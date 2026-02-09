@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome | Church System</title>
+  <link rel="stylesheet" href="css/welcome.css">
+</head>
+
+<body class="welcome-body">
+
+  <div class="welcome-container">
+
+    <div class="image-wrapper">
+      <img src="images/church.jpg" alt="Church Image">
+      <!-- Arc Text -->
+      <svg class="arc-text" viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <path id="arcPath" d="M 100 220 Q 450 40 900 220" />
+        </defs>
+
+        <text fill="rgba(255,255,255,0.85)" font-size="48" font-weight="bold" text-anchor="middle"
+          style="text-shadow: 2px 2px 6px rgba(0,0,0,0.7);">
+          <textPath href="#arcPath" startOffset="50%">
+            Welcome To Berea Baptist Church
+          </textPath>
+        </text>
+      </svg>
+
+
+      <div class="welcome-buttons">
+        <a href="login.html" class="welcome-btn">Church Administration</a>
+        <a href="https://www.berea.ca" target="_blank" class="welcome-btn secondary">
+          Church Website
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+
+</html>

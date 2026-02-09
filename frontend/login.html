@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login | Church Admin</title>
+  <link rel="stylesheet" href="css/login.css">
+</head>
+
+<body>
+
+  <div class="login-box">
+    <h2>Church Administration Login</h2>
+
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+
+    <p id="error"></p>
+  </div>
+
+  <script>
+    async function login() {
+      const errorEl = document.getElementById("error");
+      errorEl.innerText = ""; // clear previous error
+
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        window.location.href = "dashboard.html";
+      } else {
+        errorEl.innerText = data.message || "Invalid login credentials";
+      }
+    }
+  </script>
+
+  <!-- <script src="frontend/login.js"></script> -->
+</body>
+
+</html>
