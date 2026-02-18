@@ -28,6 +28,7 @@ The system is developed using modern full-stack web technologies and follows bes
 - scroll down and click Windows Installer (.msi)
 - Install it using default settings — this automatically installs npm.
 
+
 ## Environment Variables
 - Open Environment Variables
 - Press Start
@@ -52,7 +53,7 @@ C:\Users\<Your User Name>\AppData\Roaming\npm
 ## Install git
 - Install git using the following link :- https://git-scm.com/download/win
 - Choose Git for Windows/x64 Setup
-- Make sure to choose (Add a Git Bash Profile to Windows Terminal) as click Next along the installation
+- Make sure to choose (Add a Git Bash Profile to Windows Terminal) as you click Next along the installation
 - Leave all settings as they are, Install and click Finish.
 
  
@@ -63,7 +64,7 @@ C:\Users\<Your User Name>\AppData\Roaming\npm
 
 ## Open Visual Studio Code on your PC / Laptop
 - In Visual Studio Code
-- click file -> open folder -> locate the file (W26_4495_S3_BasilR) , under C:/Users/<YourUsername>/
+- click file -> open folder -> locate the file (W26_4495_S3_BasilR) , under C:/Users/<Your_Username>/
 - Locate the last 3 dots at the top left menu, Open (Terminal -> New Terminal)
 - type npm install
 - type npm install jsonwebtoken
@@ -74,5 +75,5 @@ C:\Users\<Your User Name>\AppData\Roaming\npm
 - type cd backend
 - type node server.js
 
-The App is now running, it will open on a web browser.
+The App is now running, it will open in a web browser.
 
