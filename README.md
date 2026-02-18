@@ -11,20 +11,20 @@ The system is developed using modern full-stack web technologies and follows bes
 
 # Installation Instructions
 - Visual Studio Code
-Download Visual Studio Code on the following link :- https://visualstudio.microsoft.com/downloads/
-scroll down to Visual Studio Code and click Free Download
-choose (Windows x64 User Installer)
-double click the setup file downloaded to the Downloads folder
-Accept the agreement and click Next
-continue clicking Next until you get to the Install button
-click Install
-Then click Finish
+- Download Visual Studio Code on the following link :- https://visualstudio.microsoft.com/downloads/
+- scroll down to Visual Studio Code and click Free Download
+- choose (Windows x64 User Installer)
+- double click the setup file downloaded to the Downloads folder
+- Accept the agreement and click Next
+- continue clicking Next until you get to the Install button
+- click Install
+- Then click Finish
 
 - Node.js
-Install Node.js using the following link :- https://nodejs.org
-click Get Node.js on the screen that pops up.
-click at the top highlighted in green, the line (latest node.js version) to get the latest version
-scroll down and click Windows Installer (.msi)
+ Install Node.js using the following link :- https://nodejs.org
+ click Get Node.js on the screen that pops up.
+ click at the top highlighted in green, the line (latest node.js version) to get the latest version
+ scroll down and click Windows Installer (.msi)
 Install it using default settings — this automatically installs npm.
 
 - Environment Variables
