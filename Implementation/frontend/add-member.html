@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Add Member</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <h2>Church Admin</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="add-member.html">Add Member</a></li>
+      <li><a href="members.html">Members-Report</a></li>
+    </ul>
+  </nav>
+
+  <div class="form-container">
+
+    <h2>Add Member</h2>
+
+    <input id="firstName" placeholder="First Name">
+    <input id="lastName" placeholder="Last Name">
+
+    <!-- Gender Dropdown -->
+    <select id="gender">
+      <option value="">Select Gender</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <input id="phone" placeholder="Phone Number">
+    <input id="email" placeholder="Email Address">
+    <input id="address" placeholder="Address">
+
+    <!-- Join Date Calendar -->
+    <input type="date" id="joinDate">
+
+    <!-- Status Dropdown -->
+    <select id="status">
+      <option value="Active" selected>Active</option>
+      <option value="Inactive">Inactive</option>
+      <option value="Transferred">Transferred</option>
+    </select>
+
+    <button onclick="addMember()">Save</button>
+
+    <p id="message"></p>
+  </div>
+
+  <script>
+    async function addMember() {
+      const memberData = {
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        gender: document.getElementById("gender").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+        address: document.getElementById("address").value,
+        joinDate: document.getElementById("joinDate").value,
+        status: document.getElementById("status").value || "Active"
+      };
+
+      try {
+        const response = await fetch("http://localhost:5000/api/members", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(memberData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.details || "Failed to save member");
+        }
+
+        document.getElementById("message").innerText =
+          alert("Member saved successfully!");
+      } catch (error) {
+        document.getElementById("message").innerText =
+          "Error: " + error.message;
+      }
+    }
+  </script>
+
+</body>
+
+</html>

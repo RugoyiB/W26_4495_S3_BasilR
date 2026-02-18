@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit User</title>
+    <script src="authGuard.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>Church Admin</h2>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="users-report.html">Users Report</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="form-container">
+        <h2>Edit User</h2>
+
+        <input id="name" placeholder="Name">
+        <input id="email" placeholder="Email">
+
+        <select id="role">
+            <option value="ADMIN">ADMIN</option>
+            <option value="PASTOR">PASTOR</option>
+            <option value="TREASURER">TREASURER</option>
+            <option value="STAFF">STAFF</option>
+        </select>
+
+        <button onclick="updateUser()">Update User</button>
+
+        <p id="message"></p>
+    </div>
+
+    <script>
+        requireRole("ADMIN");
+
+        const API_URL = "http://localhost:5000/api/users";
+        const token = localStorage.getItem("token");
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get("id");
+
+        if (!userId) {
+            alert("No user ID provided");
+            window.location.href = "users-report.html";
+        }
+
+        async function loadUser() {
+            const res = await fetch(`${API_URL}/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                alert("Failed to load user");
+                return;
+            }
+
+            const user = await res.json();
+            document.getElementById("name").value = user.name;
+            document.getElementById("email").value = user.email;
+            document.getElementById("role").value = user.role;
+        }
+
+        async function updateUser() {
+            const res = await fetch(`${API_URL}/${userId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name: document.getElementById("name").value,
+                    email: document.getElementById("email").value,
+                    role: document.getElementById("role").value
+                })
+            });
+
+            if (res.ok) {
+                alert("User updated successfully");
+                window.location.href = "users-report.html";
+            } else {
+                alert("Update failed");
+            }
+        }
+        loadUser();
+    </script>
+</body>
+
+</html>
