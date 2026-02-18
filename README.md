@@ -40,26 +40,34 @@ Scroll to Path
 Click Edit
 Click New
 Add the below two lines:
-
 C:\Program Files\nodejs\
 C:\Users\<Your User Name>\AppData\Roaming\npm
 
 - Web Browser
 Google Chrome or Microsoft Edge is recommended.
 
+- Install git
+Install git using the following link :- https://git-scm.com/download/win
+Choose Git for Windows/x64 Setup
+Make sure to choose (Add a Git Bash Profile to Windows Terminal) as click Next along the installation
+Leave all settings as they are, Install and click Finish.
+
 - Clone the GitHub Repository
 Open a terminal or command prompt and run:
 git clone https://github.com/RugoyiB/W26_4495_S3_BasilR.git
-cd W26_4495_S3_BasilR
 
 - Open Visual Studio Code on your PC / Laptop
 In Visual Studio Code
-click file -> open folder -> locate the file (W26_4495_S3_BasilR)
-Open Terminal
-type cd backend
-type npm install express mongoose cors dotenv
+click file -> open folder -> locate the file (W26_4495_S3_BasilR) , under C:/Users/<YourUsername>/
+Locate the last 3 dots at the top left menu, Open (Terminal -> New Terminal)
 type npm install
 type npm install jsonwebtoken
 type npm install bcryptjs
 type node createAdmin.js
 type npm install open
+type cd implementation
+type cd backend
+type node server.js
+
+The App is now running, it will open on a web browser.
+
