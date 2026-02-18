@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Church Management</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      width: 360px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .container img {
+      width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2c7be5;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1a68d1;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Church Image -->
+    <img src="church.png" alt="Church Image">
+
+    <h2>Add Member</h2>
+
+    <input id="firstName" placeholder="First Name">
+    <input id="lastName" placeholder="Last Name">
+
+    <!-- Gender Dropdown -->
+    <select id="gender">
+      <option value="">Select Gender</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <input id="phone" placeholder="Phone Number">
+    <input id="email" placeholder="Email Address">
+    <input id="address" placeholder="Address">
+
+    <!-- Join Date Calendar -->
+    <input type="date" id="joinDate">
+
+    <!-- Status Dropdown -->
+    <select id="status">
+      <option value="Active" selected>Active</option>
+      <option value="Inactive">Inactive</option>
+      <option value="Transferred">Transferred</option>
+    </select>
+
+    <button onclick="addMember()">Save</button>
+
+    <p id="message"></p>
+  </div>
+
+  <script>
+    async function addMember() {
+      const memberData = {
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        gender: document.getElementById("gender").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+        address: document.getElementById("address").value,
+        joinDate: document.getElementById("joinDate").value,
+        status: document.getElementById("status").value || "Active"
+      };
+
+      try {
+        const response = await fetch("http://localhost:5000/api/members", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(memberData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.details || "Failed to save member");
+        }
+
+        document.getElementById("message").innerText =
+          "Member saved successfully!";
+      } catch (error) {
+        document.getElementById("message").innerText =
+          "Error: " + error.message;
+      }
+    }
+  </script>
+
+</body>
+
+</html>
