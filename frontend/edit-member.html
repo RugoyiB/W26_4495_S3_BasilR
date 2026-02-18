@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Member</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="authGuard.js"></script>
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <h2>Church Admin</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="members.html">Members-Report</a></li>
+    </ul>
+  </nav>
+
+  <div class="form-container">
+    <h2>Edit Member</h2>
+
+    <form id="editMemberForm">
+
+      <input id="firstName" placeholder="First Name" required>
+      <input id="lastName" placeholder="Last Name" required>
+
+      <!-- Gender Dropdown -->
+      <select id="gender">
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <input id="phone" placeholder="Phone Number">
+      <input id="email" placeholder="Email Address">
+      <input id="address" placeholder="Address">
+
+      <!-- Join Date Calendar -->
+      <input id="joinDate" type="date">
+
+      <!-- Status Dropdown -->
+      <select id="status">
+        <option value="Active" selected>Active</option>
+        <option value="Inactive">Inactive</option>
+        <option value="Transferred">Transferred</option>
+      </select>
+
+      <button type="submit">Update Member</button>
+
+    </form>
+
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:5000/api/members";
+    const headers = { Authorization: `Bearer ${window.authToken}` };
+    const params = new URLSearchParams(window.location.search);
+    const memberId = params.get("id");
+
+    if (!memberId) {
+      alert("No member ID provided");
+      window.location.href = "members.html";
+    }
+    // Load member data
+    async function loadMember() {
+      try {
+        console.log("TOKEN:", window.authToken);
+        const res = await fetch(`${API_URL}/${memberId}`, {
+          headers: {
+            Authorization: `Bearer ${window.authToken}`
+          }
+        });
+
+        console.log("STATUS:", res.status);
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("API ERROR:", errText);
+          throw new Error(`Failed to load member (${res.status})`);
+        }
+
+        const member = await res.json();
+        console.log("MEMBER DATA:", member);
+
+        document.getElementById("firstName").value = member.firstName || "";
+        document.getElementById("lastName").value = member.lastName || "";
+        document.getElementById("gender").value = member.gender || "";
+        document.getElementById("phone").value = member.phone || "";
+        document.getElementById("email").value = member.email || "";
+        document.getElementById("address").value = member.address || "";
+        document.getElementById("joinDate").value =
+          member.joinDate ? member.joinDate.split("T")[0] : "";
+        document.getElementById("status").value = member.status;
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Update member
+    document.getElementById("editMemberForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      console.log("UPDATE SUBMITTED");
+
+      const updatedMember = {
+        firstName: firstName.value,
+        lastName: lastName.value,
+        gender: gender.value,
+        phone: phone.value,
+        email: email.value,
+        address: address.value,
+        joinDate: joinDate.value,
+        status: status.value
+      };
+
+      console.log("Payload:", updatedMember);
+
+      const res = await fetch(`${API_URL}/${memberId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${window.authToken}`
+        },
+        body: JSON.stringify(updatedMember)
+      });
+
+      if (res.ok) {
+        alert("Member updated successfully");
+        window.location.href = "members.html";
+      } else {
+        alert("Update failed");
+      }
+    });
+
+    loadMember();
+
+  </script>
+</body>
+
+</html>

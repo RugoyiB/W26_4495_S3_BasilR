@@ -5,7 +5,26 @@
   <meta charset="UTF-8">
   <title>Welcome | Church System</title>
   <link rel="stylesheet" href="css/welcome.css">
+  <link rel="stylesheet" href="css/chatbot.css">
 </head>
+
+<div id="chatbot-container"></div>
+
+<script>
+  fetch("partials/chatbot.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("chatbot-container").innerHTML = html;
+
+      // Load chatbot.js AFTER HTML exists
+      const script = document.createElement("script");
+      script.src = "chatbot.js";
+      script.onload = () => {
+        initChatbot();
+      };
+      document.body.appendChild(script);
+    });
+</script>
 
 <body class="welcome-body">
 
@@ -27,7 +46,6 @@
         </text>
       </svg>
 
-
       <div class="welcome-buttons">
         <a href="login.html" class="welcome-btn">Church Administration</a>
         <a href="https://www.berea.ca" target="_blank" class="welcome-btn secondary">
@@ -35,9 +53,6 @@
         </a>
       </div>
     </div>
-
   </div>
-
 </body>
-
 </html>

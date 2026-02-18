@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Users Report</title>
+    <script src="authGuard.js"></script>
+    <link rel="stylesheet" href="css/attReport.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <h2>Church Admin</h2>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="users-report.html">Users Report</a></li>
+        </ul>
+    </nav>
+
+    <div class="table-container">
+        <h2>System Users</h2>
+        <div class="filters">
+            <button onclick="exportCSV()">Export CSV</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        requireRole("ADMIN"); // ADMIN ONLY
+
+        const API_URL = "http://localhost:5000/api/users";
+        const token = localStorage.getItem("token");
+        let usersData = []; // GLOBAL storage for CSV
+
+        async function loadUsers() {
+            try {
+                const res = await fetch(API_URL, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                console.log("STATUS:", res.status);
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error("API ERROR:", errorText);
+                    alert("Failed to load users");
+                    return;
+                }
+
+                const users = await res.json();
+                usersData = users; //store for CSV
+
+                const table = document.getElementById("usersTable");
+                table.innerHTML = "";
+
+                users.forEach(user => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+          <td>${user.name}</td>
+          <td>${user.email}</td>
+          <td>${user.role}</td>
+          <td>${user.createdAt.split("T")[0]}</td>
+          <td class="actions">
+            <i class="fa-solid fa-pen" onclick="editUser('${user._id}')"></i>
+            <i class="fa-solid fa-trash" onclick="deleteUser('${user._id}')"></i>
+          </td>
+        `;
+                    table.appendChild(row);
+                });
+            } catch (err) {
+                console.error("FETCH ERROR:", err);
+                alert("Unexpected error loading users");
+            }
+        }
+
+        function editUser(id) {
+            window.location.href = `edit-user.html?id=${id}`;
+        }
+
+        async function deleteUser(id) {
+            if (!confirm("Delete this user?")) return;
+
+            const res = await fetch(`${API_URL}/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                loadUsers();
+            } else {
+                alert("Delete failed");
+            }
+        }
+
+        function editUser(id) {
+            window.location.href = `edit-user.html?id=${id}`;
+        }
+
+        async function deleteUser(id) {
+            if (!confirm("Delete this user?")) return;
+
+            const res = await fetch(`${API_URL}/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                loadUsers();
+            } else {
+                alert("Delete failed");
+            }
+        }
+
+        function exportCSV() {
+            if (usersData.length === 0) {
+                alert("No data to export");
+                return;
+            }
+
+            let csv = "Name,Email,Role,Created\n";
+            usersData.forEach(u => {
+                csv += `"${u.name}","${u.email}","${u.role}","${u.createdAt.split("T")[0]}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: "text/csv" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "users_report.csv";
+            a.click();
+        }
+        loadUsers();
+    </script>
+</body>
+
+</html>
