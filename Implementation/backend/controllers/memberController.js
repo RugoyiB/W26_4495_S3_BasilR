@@ -46,11 +46,19 @@ exports.getMemberById = async (req, res) => {
 // Update a member
 exports.updateMember = async (req, res) => {
   try {
+    console.log("UPDATE PAYLOAD:", req.body);
     const member = await Member.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
+      { $set: req.body },
+      {
+        new: true,
+        runValidators: true
+      }
     );
+
+    if (!member) {
+      return res.status(404).json({ message: "Member not found" });
+    }
     res.status(200).json(member);
   } catch (error) {
     res.status(400).json({

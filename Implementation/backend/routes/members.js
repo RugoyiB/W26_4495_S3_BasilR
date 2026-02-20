@@ -17,6 +17,6 @@ router.get("/:id", auth, memberController.getMemberById);
 router.put("/:id", auth, memberController.updateMember);
 
 // Delete member
-router.delete("/:id", auth, memberController.deleteMember);
+router.delete("/:id", auth, authorize("ADMIN"), memberController.deleteMember);
 
 module.exports = router;
