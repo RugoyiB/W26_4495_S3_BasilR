@@ -34,7 +34,9 @@
         <option value="Other">Other</option>
       </select>
 
-      <input id="phone" placeholder="Phone Number">
+      <!-- <input id="phone" placeholder="Phone Number"> -->
+      <input id="phone" placeholder="Phone Number" inputmode="numeric" pattern="[0-9]*"
+        oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
       <input id="email" placeholder="Email Address">
       <input id="address" placeholder="Address">
 
@@ -106,14 +108,14 @@
       console.log("UPDATE SUBMITTED");
 
       const updatedMember = {
-        firstName: firstName.value,
-        lastName: lastName.value,
-        gender: gender.value,
-        phone: phone.value,
-        email: email.value,
-        address: address.value,
-        joinDate: joinDate.value,
-        status: status.value
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        gender: document.getElementById("gender").value,
+        phone: document.getElementById("phone").value,
+        email: document.getElementById("email").value,
+        address: document.getElementById("address").value,
+        joinDate: document.getElementById("joinDate").value,
+        status: document.getElementById("status").value
       };
 
       console.log("Payload:", updatedMember);
@@ -134,7 +136,6 @@
         alert("Update failed");
       }
     });
-
     loadMember();
 
   </script>

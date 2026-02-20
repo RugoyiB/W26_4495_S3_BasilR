@@ -13,7 +13,7 @@
     <h2>Church Admin</h2>
     <ul>
       <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="add-member.html">Add Member</a></li>
+      <li><a href="add-member.html">Add-Member</a></li>
       <li><a href="members.html">Members-Report</a></li>
     </ul>
   </nav>
@@ -33,7 +33,8 @@
       <option value="Other">Other</option>
     </select>
 
-    <input id="phone" placeholder="Phone Number">
+    <input id="phone" placeholder="Phone Number" inputmode="numeric" pattern="[0-9]*"
+      oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
     <input id="email" placeholder="Email Address">
     <input id="address" placeholder="Address">
 
@@ -50,9 +51,12 @@
     <button onclick="addMember()">Save</button>
 
     <p id="message"></p>
+
   </div>
 
   <script>
+    const token = localStorage.getItem("token");
+
     async function addMember() {
       const memberData = {
         firstName: document.getElementById("firstName").value,
@@ -68,25 +72,35 @@
       try {
         const response = await fetch("http://localhost:5000/api/members", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify(memberData)
         });
-
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.details || "Failed to save member");
+          throw new Error(data.message || "Failed to save member");
         }
 
-        document.getElementById("message").innerText =
-          alert("Member saved successfully!");
+        // alert("Member saved successfully!");
+        document.getElementById("message").innerText = "Member added successfully!";
+
+        document.getElementById("firstName").value = "";
+        document.getElementById("lastName").value = "";
+        document.getElementById("gender").value = "";
+        document.getElementById("phone").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("address").value = "";
+        document.getElementById("joinDate").value = "";
+        document.getElementById("status").value || "Active";
       } catch (error) {
         document.getElementById("message").innerText =
           "Error: " + error.message;
       }
     }
   </script>
-
 </body>
 
 </html>
