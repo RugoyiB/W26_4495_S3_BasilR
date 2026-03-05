@@ -1,4 +1,5 @@
 const Member = require("../models/Member");
+const Attendance = require("../models/Attendance");
 
 // Create a new member
 exports.createMember = async (req, res) => {
@@ -71,9 +72,24 @@ exports.updateMember = async (req, res) => {
 // Delete a member
 exports.deleteMember = async (req, res) => {
   try {
-    await Member.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Member deleted successfully" });
+    const memberId = req.params.id;
+
+    // Delete attendance records for this member
+    await Attendance.deleteMany({ member: memberId });
+
+    // Delete the member
+    const deletedMember = await Member.findByIdAndDelete(memberId);
+
+    if (!deletedMember) {
+      return res.status(404).json({ message: "Member not found" });
+    }
+
+    res.status(200).json({
+      message: "Member and related attendance records deleted successfully"
+    });
   } catch (error) {
+    console.error("DELETE MEMBER ERROR:", error);
+
     res.status(500).json({
       error: "Validation failed",
       details: error.message

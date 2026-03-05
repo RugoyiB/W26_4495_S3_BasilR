@@ -66,6 +66,9 @@ exports.getAttendanceReport = async (req, res) => {
 
     res.json(records);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      error: "Failed to generate attendance report",
+      details: error.message
+    });
   }
 };

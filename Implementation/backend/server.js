@@ -3,8 +3,11 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const { fetchAllChurchContent } = require("./services/websiteScraper");
 
 const app = express();
+
+global.churchContent = "";
 
 // Connect to MongoDB
 connectDB();
@@ -12,6 +15,10 @@ connectDB();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+(async () => {
+  global.churchContent = await fetchAllChurchContent();
+})();
 
 // Routes
 app.use("/api/members", require("./routes/members"));
