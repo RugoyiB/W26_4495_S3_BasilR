@@ -66,13 +66,15 @@ C:\Users\<Your User Name>\AppData\Roaming\npm
 - In Visual Studio Code
 - click file -> open folder -> locate the file (W26_4495_S3_BasilR) , under C:/Users/<Your_Username>/
 - Locate the last 3 dots at the top left menu, Open (Terminal -> New Terminal)
+- type cd implementation
+- type cd backend
 - type npm install
 - type npm install jsonwebtoken
 - type npm install bcryptjs
 - type node createAdmin.js
 - type npm install open
-- type cd implementation
-- type cd backend
+- type npm install axios cheerio
+- type npm install openai
 - type node server.js
 
 The App is now running, it will open in a web browser.
