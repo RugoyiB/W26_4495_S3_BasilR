@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Attendance Report</title>
+  <link rel="stylesheet" href="css/attReport.css">
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <h2>Church Admin</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="attendance.html">Attendance</a></li>
+      <li><a href="attendance-report.html">Attendance Report</a></li>
+    </ul>
+  </nav>
+
+  <div class="table-container">
+    <h2>Attendance Report</h2>
+
+    <div class="filters">
+      <input type="date" id="startDate">
+      <input type="date" id="endDate">
+      <button onclick="loadReport()">Filter</button>
+      <button onclick="exportCSV()">Export CSV</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="reportTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const REPORT_API = "http://localhost:5000/api/attendance/report";
+    let reportData = [];
+
+    async function loadReport() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+
+      let url = REPORT_API;
+      if (start && end) {
+        url += `?startDate=${start}&endDate=${end}`;
+      }
+
+      // const res = await fetch(url);
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(url, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      reportData = await res.json();
+
+      const table = document.getElementById("reportTable");
+      table.innerHTML = "";
+
+      reportData.forEach(r => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        
+        <td>  ${r.member
+            ? `${r.member.firstName} ${r.member.lastName}`
+            : "Member Deleted"} </td>
+        <td>${r.date.split("T")[0]}</td>
+        <td>${r.status}</td>
+      `;
+        table.appendChild(row);
+      });
+    }
+
+    function exportCSV() {
+      if (reportData.length === 0) return alert("No data to export");
+
+      let csv = "Member,Date,Status\n";
+      reportData.forEach(r => {
+        const memberName = r.member
+          ? `${r.member.firstName} ${r.member.lastName}`
+          : "Member Deleted";
+
+        csv += `"${memberName}",`;
+        csv += `"${r.date.split("T")[0]}",`;
+        csv += `"${r.status}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "attendance_report.csv";
+      a.click();
+    }
+
+    loadReport();
+  </script>
+
+</body>
+
+</html>
