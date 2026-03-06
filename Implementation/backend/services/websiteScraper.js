@@ -41,7 +41,6 @@ async function scrapePage(title, url) {
         return "";
     }
 }
-
 async function fetchAllChurchContent() {
     let content = "";
 
@@ -52,5 +51,4 @@ async function fetchAllChurchContent() {
 
     return content.trim();
 }
-
 module.exports = { fetchAllChurchContent };
