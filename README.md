@@ -62,6 +62,12 @@ C:\Users\<Your User Name>\AppData\Roaming\npm
 - git clone https://github.com/RugoyiB/W26_4495_S3_BasilR.git
 
 
+## API Key Notice
+- This project requires an API key to use the chatbot.
+- Sign In / Log in to https://platform.openai.com/ and create your key
+- OPEN_API_KEY to be added to the .env file.
+
+
 ## Open Visual Studio Code on your PC / Laptop
 - In Visual Studio Code
 - click file -> open folder -> locate the file (W26_4495_S3_BasilR) , under C:/Users/<Your_Username>/
@@ -78,4 +84,6 @@ C:\Users\<Your User Name>\AppData\Roaming\npm
 - type node server.js
 
 The App is now running, it will open in a web browser.
+
+
 
