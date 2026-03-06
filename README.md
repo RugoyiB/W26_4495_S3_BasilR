@@ -64,7 +64,7 @@ C:\Users\<Your User Name>\AppData\Roaming\npm
 
 ## API Key Notice
 - This project requires an API key to use the chatbot.
-- Sign In / Log in to https://platform.openai.com/ and create your key
+- Sign In / Log in to https://platform.openai.com/ and create your key.
 - OPEN_API_KEY to be added to the .env file.
 
 
@@ -84,6 +84,3 @@ C:\Users\<Your User Name>\AppData\Roaming\npm
 - type node server.js
 
 The App is now running, it will open in a web browser.
-
-
-
