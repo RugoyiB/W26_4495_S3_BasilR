@@ -89,7 +89,6 @@ exports.deleteMember = async (req, res) => {
     });
   } catch (error) {
     console.error("DELETE MEMBER ERROR:", error);
-
     res.status(500).json({
       error: "Validation failed",
       details: error.message
