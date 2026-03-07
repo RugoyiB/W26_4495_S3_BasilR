@@ -29,7 +29,6 @@ If the answer is not found in the content, respond with:
 CHURCH WEBSITE CONTENT:
 ${global.churchContent}
 `;
-
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
