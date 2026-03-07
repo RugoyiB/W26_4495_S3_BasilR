@@ -65,6 +65,7 @@ exports.getAttendanceReport = async (req, res) => {
       .sort({ date: -1 });
 
     res.json(records);
+
   } catch (error) {
     res.status(500).json({
       error: "Failed to generate attendance report",
