@@ -84,7 +84,6 @@
   margin-bottom: 6px;
 }
 
-/* Body */
 body {
   font-family: Arial;
   background: #f4f6f8;
@@ -118,4 +117,12 @@ body {
 input {
   width: 80%;
   padding: 8px;
+}
+
+button {
+  width: 18%;
+  padding: 8px;
+  background: #2c7be5;
+  color: white;
+  border: none;
 }
