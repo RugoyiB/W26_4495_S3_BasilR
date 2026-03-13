@@ -1,11 +1,13 @@
 const Member = require("../models/Member");
 const Attendance = require("../models/Attendance");
+const logAction = require("../services/auditLogger");
 
 // Create a new member
 exports.createMember = async (req, res) => {
   try {
     const member = new Member(req.body);
     await member.save();
+    await logAction(req, "CREATE", "Members", `Created member ${member.firstName}`);
     res.status(201).json(member);
   } catch (error) {
     res.status(400).json({
@@ -60,6 +62,9 @@ exports.updateMember = async (req, res) => {
     if (!member) {
       return res.status(404).json({ message: "Member not found" });
     }
+
+    await logAction(req, "UPDATE", "Members", `Updated member ${member.firstName}`);
+
     res.status(200).json(member);
   } catch (error) {
     res.status(400).json({
@@ -83,6 +88,8 @@ exports.deleteMember = async (req, res) => {
     if (!deletedMember) {
       return res.status(404).json({ message: "Member not found" });
     }
+
+    await logAction(req, "DELETE", "Members", `Deleted member ${deletedMember.firstName}`);
 
     res.status(200).json({
       message: "Member and related attendance records deleted successfully"
