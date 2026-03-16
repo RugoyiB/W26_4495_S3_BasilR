@@ -1,22 +1,43 @@
 const mongoose = require("mongoose");
 
-const auditLogSchema = new mongoose.Schema({
+const AuditLogSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: false
+  },
+  module: {
+    type: String,
+    required: true
+  },
+  action: {
+    type: String,
+    enum: ["CREATE", "UPDATE", "DELETE", "LOGIN"],
+    required: true
+  },
+  recordId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: false
+  },
+  previousValue: {
+    type: Object,
     default: null
   },
-  method: String,
-  endpoint: String,
-  module: String,
-  action: String,
-  details: String,
-  ipAddress: String,
-  statusCode: Number,
+  newValue: {
+    type: Object,
+    default: null
+  },
+  details: {
+    type: String,
+    default: ""
+  },
+  ipAddress: {
+    type: String
+  },
   timestamp: {
     type: Date,
     default: Date.now
   }
 });
 
-module.exports = mongoose.model("AuditLog", auditLogSchema);
+module.exports = mongoose.model("AuditLog", AuditLogSchema);
