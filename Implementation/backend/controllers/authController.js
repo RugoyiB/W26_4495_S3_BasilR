@@ -19,18 +19,21 @@ exports.login = async (req, res) => {
     return res.status(401).json({ message: "Invalid credentials" });
   }
 
+  // Log login action
+  await logAction(
+    { user: { id: user._id }, ip: req.ip },
+    "LOGIN",
+    "Auth",
+    `${user.name} logged into the system`,
+    null,
+    null,
+    user._id
+  );
+
   const token = jwt.sign(
     { id: user._id, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: "8h" }
-  );
-
-  await logAction(
-    req,
-    "LOGIN",
-    "Auth",
-    `${user.firstName} ${user.lastName} logged into the system`,
-    user._id
   );
 
   res.json({
