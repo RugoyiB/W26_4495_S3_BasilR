@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const auditRoutes = require("./routes/audit");
 const { fetchAllChurchContent } = require("./services/websiteScraper");
 
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api/attendance", require("./routes/attendance"));
 app.use("/api/chatbot", require("./routes/chatbot"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
+app.use("/api/audit", auditRoutes);
 
 // Default route → welcome.html
 app.get("/", (req, res) => {
