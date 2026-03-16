@@ -2,13 +2,22 @@ const AuditLog = require("../models/AuditLog");
 
 exports.getAuditLogs = async (req, res) => {
   try {
+    const { startDate, endDate } = req.query;
 
-    const logs = await AuditLog.find()
-      .populate("user", "username email")
+    let filter = {};
+
+    if (startDate && endDate) {
+      filter.timestamp = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const logs = await AuditLog.find(filter)
+      .populate("user", "name")
       .sort({ timestamp: -1 });
 
     res.status(200).json(logs);
-
   } catch (error) {
     res.status(500).json({
       message: "Error retrieving audit logs",
