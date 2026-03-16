@@ -4,19 +4,19 @@ const memberController = require("../controllers/memberController");
 const auth = require("../middleware/auth");
 const authorize = require("../middleware/authorize");
 
-// Create member
+// CREATE
 router.post("/", auth, memberController.createMember);
 
-// Get all members
+// READ ALL
 router.get("/", auth, memberController.getAllMembers);
 
-// Get single member
+// READ ONE
 router.get("/:id", auth, memberController.getMemberById);
 
-// Update member
+// UPDATE
 router.put("/:id", auth, memberController.updateMember);
 
-// Delete member
+// DELETE
 router.delete("/:id", auth, authorize("ADMIN"), memberController.deleteMember);
 
 module.exports = router;
