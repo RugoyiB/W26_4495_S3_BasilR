@@ -2,103 +2,121 @@ const Member = require("../models/Member");
 const Attendance = require("../models/Attendance");
 const logAction = require("../services/auditLogger");
 
-// Create a new member
+function getChangedFields(oldData, newData) {
+  const previous = {};
+  const updated = {};
+
+  Object.keys(newData).forEach(key => {
+    if (JSON.stringify(oldData[key]) !== JSON.stringify(newData[key])) {
+      previous[key] = oldData[key];
+      updated[key] = newData[key];
+    }
+  });
+
+  return { previous, updated };
+}
+
+// CREATE MEMBER
 exports.createMember = async (req, res) => {
   try {
-    const member = new Member(req.body);
-    await member.save();
-    await logAction(req, "CREATE", "Members", `Created member ${member.firstName}`);
+    const member = await Member.create(req.body);
+
+    await logAction(
+      req,
+      "CREATE",
+      "Member",
+      "New member created",
+      null,
+      member,
+      member._id
+    );
+
     res.status(201).json(member);
   } catch (error) {
-    res.status(400).json({
-      error: "Validation failed",
-      details: error.message
-    });
+    res.status(400).json({ error: "Validation failed", details: error.message });
   }
 };
 
-// Get all members
+// GET ALL MEMBERS
 exports.getAllMembers = async (req, res) => {
   try {
     const members = await Member.find();
     res.status(200).json(members);
   } catch (error) {
-    res.status(500).json({
-      error: "Validation failed",
-      details: error.message
-    });
+    res.status(500).json({ error: "Server error", details: error.message });
   }
 };
 
-// Get a single member by ID
+// GET MEMBER BY ID
 exports.getMemberById = async (req, res) => {
   try {
     const member = await Member.findById(req.params.id);
-    if (!member) {
-      return res.status(404).json({ message: "Member not found" });
-    }
+    if (!member) return res.status(404).json({ message: "Member not found" });
+
     res.status(200).json(member);
   } catch (error) {
-    res.status(500).json({
-      error: "Validation failed",
-      details: error.message
-    });
+    res.status(500).json({ error: "Server error", details: error.message });
   }
 };
 
-// Update a member
+// UPDATE MEMBER
 exports.updateMember = async (req, res) => {
   try {
-    console.log("UPDATE PAYLOAD:", req.body);
-    const member = await Member.findByIdAndUpdate(
+    const oldMember = await Member.findById(req.params.id);
+    if (!oldMember) return res.status(404).json({ message: "Member not found" });
+
+    const updatedMember = await Member.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
-      {
-        new: true,
-        runValidators: true
-      }
+      { new: true, runValidators: true }
     );
 
-    if (!member) {
-      return res.status(404).json({ message: "Member not found" });
-    }
+    const { previous, updated } = getChangedFields(
+      oldMember.toObject(),
+      updatedMember.toObject()
+    );
 
-    await logAction(req, "UPDATE", "Members", `Updated member ${member.firstName}`);
+    await logAction(
+      req,
+      "UPDATE",
+      "Member",
+      "Member information updated",
+      previous,
+      updated,
+      req.params.id
+    );
 
-    res.status(200).json(member);
+    res.status(200).json(updatedMember);
   } catch (error) {
-    res.status(400).json({
-      error: "Validation failed",
-      details: error.message
-    });
+    res.status(400).json({ error: "Validation failed", details: error.message });
   }
 };
 
-// Delete a member
+// DELETE MEMBER
 exports.deleteMember = async (req, res) => {
   try {
     const memberId = req.params.id;
 
-    // Delete attendance records for this member
     await Attendance.deleteMany({ member: memberId });
 
-    // Delete the member
     const deletedMember = await Member.findByIdAndDelete(memberId);
-
-    if (!deletedMember) {
+    if (!deletedMember)
       return res.status(404).json({ message: "Member not found" });
-    }
 
-    await logAction(req, "DELETE", "Members", `Deleted member ${deletedMember.firstName}`);
+    await logAction(
+      req,
+      "DELETE",
+      "Member",
+      "Member deleted",
+      deletedMember,
+      null,
+      memberId
+    );
 
     res.status(200).json({
       message: "Member and related attendance records deleted successfully"
     });
   } catch (error) {
-    console.error("DELETE MEMBER ERROR:", error);
-    res.status(500).json({
-      error: "Validation failed",
-      details: error.message
-    });
+    res.status(500).json({ error: "Server error", details: error.message });
   }
 };
