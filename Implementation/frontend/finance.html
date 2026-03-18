@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Financial Record</title>
+  <script src="frontend/authGuard.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+<nav class="navbar">
+  <h2>Church Admin</h2>
+  <ul>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="finance.html">Finance</a></li>
+    <li><a href="finance-report.html">Finance Report</a></li>
+  </ul>
+</nav>
+
+<div class="form-container">
+  <h2>Add Financial Record</h2>
+
+  <select id="member"></select>
+
+  <input id="amount" type="number" placeholder="Amount">
+
+  <select id="type">
+    <option value="">Select Type</option>
+    <option value="Tithe">Tithe</option>
+    <option value="Offering">Offering</option>
+    <option value="Donation">Donation</option>
+  </select>
+
+  <select id="paymentMethod">
+    <option value="">Payment Method</option>
+    <option value="Cash">Cash</option>
+    <option value="Bank Transfer">Bank Transfer</option>
+    <option value="Mobile Money">Mobile Money</option>
+  </select>
+
+  <input type="date" id="date">
+  <textarea id="notes" placeholder="Notes (optional)"></textarea>
+
+  <button onclick="saveFinance()">Save</button>
+  <p id="message"></p>
+</div>
+
+<script>
+  const API_FINANCE = "http://localhost:5000/api/finance";
+  const API_MEMBERS = "http://localhost:5000/api/members";
+
+  async function loadMembers() {
+    const res = await fetch(API_MEMBERS);
+    const members = await res.json();
+
+    const select = document.getElementById("member");
+    members.forEach(m => {
+      select.innerHTML += `<option value="${m._id}">
+        ${m.firstName} ${m.lastName}
+      </option>`;
+    });
+  }
+
+  async function saveFinance() {
+    const data = {
+      member: member.value,
+      amount: amount.value,
+      type: type.value,
+      paymentMethod: paymentMethod.value,
+      date: date.value,
+      notes: notes.value
+    };
+
+    await fetch(API_FINANCE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    message.innerText = "Record saved successfully!";
+  }
+
+  loadMembers();
+</script>
+
+</body>
+</html>
