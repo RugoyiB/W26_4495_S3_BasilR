@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Finance Report</title>
+  <script src="frontend/authGuard.js"></script>
+  <link rel="stylesheet" href="css/attReport.css">
+</head>
+
+<body>
+
+<nav class="navbar">
+  <h2>Church Admin</h2>
+  <ul>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="finance.html">Finance</a></li>
+    <li><a href="finance-report.html">Finance Report</a></li>
+  </ul>
+</nav>
+
+<div class="table-container">
+  <h2>Financial Report</h2>
+
+  <div class="filters">
+    <input type="date" id="startDate">
+    <input type="date" id="endDate">
+    <button onclick="loadReport()">Filter</button>
+    <button onclick="exportCSV()">Export CSV</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Payment</th>
+      </tr>
+    </thead>
+    <tbody id="financeTable"></tbody>
+  </table>
+
+  <h3 id="totalAmount"></h3>
+</div>
+
+<script>
+  const REPORT_API = "http://localhost:5000/api/finance/report";
+  const financeTable = document.getElementById("financeTable");
+  const totalAmount = document.getElementById("totalAmount");
+
+  let reportData = [];
+
+  async function loadReport() {
+   const start = document.getElementById("startDate").value;
+    const end = document.getElementById("endDate").value;
+
+    let url = REPORT_API;
+    if (start && end) {
+      url += `?startDate=${start}&endDate=${end}`;
+    }
+
+    // const res = await fetch(url);
+    const token = localStorage.getItem("token");
+
+const res = await fetch(url, {
+  headers: {
+    "Authorization": `Bearer ${token}`
+  }
+});
+    reportData = await res.json();
+
+    let total = 0;
+    financeTable.innerHTML = "";
+
+    reportData.forEach(r => {
+      total += r.amount;
+      financeTable.innerHTML += `
+        <tr>
+          <tr>
+          <td>${r.member
+            ? `${r.member.firstName} ${r.member.lastName}`
+            : "Unknown Member"}
+          </td>
+          <td>${r.date.split("T")[0]}</td>
+          <td>${r.type}</td>
+          <td>$${r.amount.toFixed(2)}</td>
+          <td>${r.paymentMethod}</td>
+        </tr>
+      `;
+    });
+
+    totalAmount.innerText = "Total Collected: $" + total.toFixed(2);
+  }
+
+  function exportCSV() {
+    let csv = "Member,Date,Type,Amount,Payment\n";
+    reportData.forEach(r => {
+      csv += `"${r.member.firstName} ${r.member.lastName}",`;
+      csv += `"${r.date.split("T")[0]}",`;
+      csv += `"${r.type}",`;
+      csv += `"${r.amount}",`;
+      csv += `"${r.paymentMethod}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "finance_report.csv";
+    a.click();
+  }
+
+  loadReport();
+</script>
+
+</body>
+</html>
