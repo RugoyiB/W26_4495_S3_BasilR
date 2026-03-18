@@ -4,12 +4,14 @@ const ROLE_PERMISSIONS = {
     "menu-users",
     "menu-members",
     "menu-attendance",
+    "menu-audit",
     "menu-finance"
   ],
   PASTOR: [
     "menu-dashboard",
     "menu-members",
-    "menu-attendance"
+    "menu-attendance",
+    "menu-audit"
   ],
   TREASURER: [
     "menu-dashboard",
