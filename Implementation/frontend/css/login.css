@@ -52,3 +52,18 @@ button:hover {
   font-size: 14px;
   text-align: center;
 }
+
+.exit-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.exit-btn:hover {
+  background-color: #800000;
+}
