@@ -1,85 +1,87 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Finance Report</title>
-  <script src="frontend/authGuard.js"></script>
+  <script src="authGuard.js"></script>
   <link rel="stylesheet" href="css/attReport.css">
 </head>
 
 <body>
 
-<nav class="navbar">
-  <h2>Church Admin</h2>
-  <ul>
-    <li><a href="dashboard.html">Dashboard</a></li>
-    <li><a href="finance.html">Finance</a></li>
-    <li><a href="finance-report.html">Finance Report</a></li>
-  </ul>
-</nav>
+  <nav class="navbar">
+    <h2>Church Admin</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="finance.html">Finance</a></li>
+      <li><a href="finance-report.html">Finance Report</a></li>
+    </ul>
+  </nav>
 
-<div class="table-container">
-  <h2>Financial Report</h2>
+  <div class="table-container">
+    <h2>Financial Report</h2>
 
-  <div class="filters">
-    <input type="date" id="startDate">
-    <input type="date" id="endDate">
-    <button onclick="loadReport()">Filter</button>
-    <button onclick="exportCSV()">Export CSV</button>
+    <div class="filters">
+      <input type="date" id="startDate">
+      <input type="date" id="endDate">
+      <button onclick="loadReport()">Filter</button>
+      <button onclick="exportCSV()">Export CSV</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Payment</th>
+        </tr>
+      </thead>
+      <tbody id="financeTable"></tbody>
+    </table>
+
+    <h3 id="totalAmount"></h3>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Member</th>
-        <th>Date</th>
-        <th>Type</th>
-        <th>Amount</th>
-        <th>Payment</th>
-      </tr>
-    </thead>
-    <tbody id="financeTable"></tbody>
-  </table>
+  <script>
+    const REPORT_API = "http://localhost:5000/api/finances/report";
+    const financeTable = document.getElementById("financeTable");
+    const totalAmount = document.getElementById("totalAmount");
 
-  <h3 id="totalAmount"></h3>
-</div>
+    let reportData = [];
 
-<script>
-  const REPORT_API = "http://localhost:5000/api/finance/report";
-  const financeTable = document.getElementById("financeTable");
-  const totalAmount = document.getElementById("totalAmount");
+    async function loadReport() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
 
-  let reportData = [];
+      let url = REPORT_API;
+      if (start && end) {
+        url += `?startDate=${start}&endDate=${end}`;
+      }
 
-  async function loadReport() {
-   const start = document.getElementById("startDate").value;
-    const end = document.getElementById("endDate").value;
+      const token = localStorage.getItem("token");
 
-    let url = REPORT_API;
-    if (start && end) {
-      url += `?startDate=${start}&endDate=${end}`;
-    }
+      const res = await fetch(url, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      reportData = await res.json();
 
-    // const res = await fetch(url);
-    const token = localStorage.getItem("token");
+      let total = 0;
+      financeTable.innerHTML = "";
 
-const res = await fetch(url, {
-  headers: {
-    "Authorization": `Bearer ${token}`
-  }
-});
-    reportData = await res.json();
-
-    let total = 0;
-    financeTable.innerHTML = "";
-
-    reportData.forEach(r => {
-      total += r.amount;
-      financeTable.innerHTML += `
+      reportData.forEach(r => {
+        total += r.amount;
+        financeTable.innerHTML += `
         <tr>
           <tr>
           <td>${r.member
             ? `${r.member.firstName} ${r.member.lastName}`
-            : "Unknown Member"}
+            : r.donorName
+              ? r.donorName
+              : "Unknown Member"}
           </td>
           <td>${r.date.split("T")[0]}</td>
           <td>${r.type}</td>
@@ -87,30 +89,40 @@ const res = await fetch(url, {
           <td>${r.paymentMethod}</td>
         </tr>
       `;
-    });
+      });
 
-    totalAmount.innerText = "Total Collected: $" + total.toFixed(2);
-  }
+      totalAmount.innerText = "Total Collected: $" + total.toFixed(2);
+    }
 
-  function exportCSV() {
-    let csv = "Member,Date,Type,Amount,Payment\n";
-    reportData.forEach(r => {
-      csv += `"${r.member.firstName} ${r.member.lastName}",`;
-      csv += `"${r.date.split("T")[0]}",`;
-      csv += `"${r.type}",`;
-      csv += `"${r.amount}",`;
-      csv += `"${r.paymentMethod}"\n`;
-    });
+    function exportCSV() {
+      if (!reportData || reportData.length === 0) {
+        alert("No data to export.");
+        return;
+      }
+      let csv = "Member,Date,Type,Amount,Payment\n";
+      reportData.forEach(r => {
+        const memberName = r.member
+          ? `${r.member.firstName} ${r.member.lastName}`
+          : r.donorName
+            ? r.donorName
+            : "Unknown Member";
+        csv += `"${memberName}",`;
+        csv += `"${r.date.split("T")[0]}",`;
+        csv += `"${r.type}",`;
+        csv += `"${r.amount}",`;
+        csv += `"${r.paymentMethod}"\n`;
+      });
 
-    const blob = new Blob([csv], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "finance_report.csv";
-    a.click();
-  }
+      const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "finance_report.csv";
+      a.click();
+    }
 
-  loadReport();
-</script>
+    loadReport();
+  </script>
 
 </body>
+
 </html>
