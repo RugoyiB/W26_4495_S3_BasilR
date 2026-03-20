@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Audit Report</title>
+  <link rel="stylesheet" href="css/attReport.css">
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <h2>Church Admin</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="audit-report.html">Audit Report</a></li>
+    </ul>
+  </nav>
+
+  <div class="table-container">
+    <h2>Audit Report</h2>
+
+    <div class="filters">
+      <input type="date" id="startDate">
+      <input type="date" id="endDate">
+      <button onclick="loadReport()">Filter</button>
+      <button onclick="exportCSV()">Export CSV</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Module</th>
+          <th>Action</th>
+          <th>Previous Value</th>
+          <th>New Value</th>
+          <th>Details</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+
+      <tbody id="reportTable"></tbody>
+
+    </table>
+  </div>
+
+  <script>
+
+    const REPORT_API = "http://localhost:5000/api/audit/report";
+
+    let reportData = [];
+
+    async function loadReport() {
+
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+
+      let url = REPORT_API;
+
+      if (start && end) {
+        url += `?startDate=${start}&endDate=${end}`;
+      }
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(url, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      const data = await res.json();
+
+      console.log("API RESPONSE:", data);
+
+      if (!Array.isArray(data)) {
+        alert("Server error: " + JSON.stringify(data));
+        return;
+      }
+
+      reportData = data;
+
+      const table = document.getElementById("reportTable");
+      table.innerHTML = "";
+
+      reportData.forEach(log => {
+
+        const row = document.createElement("tr");
+
+        const userName = log.user?.name || "System";
+
+        const prevValue = Object.entries(log.previousValue || {})
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(", ")
+
+        let newValue = "";
+
+        if (log.action === "CREATE") {
+          newValue = "Record created";
+        } else {
+          newValue = Object.entries(log.newValue || {})
+            .map(([k, v]) => `${k}: ${v}`)
+            .join(", ");
+        }
+
+        const date = log.timestamp
+          ? log.timestamp.split("T")[0]
+          : "";
+
+        row.innerHTML = `
+  <td>${userName}</td>
+  <td>${log.module}</td>
+  <td>${log.action}</td>
+  <td>${Object.keys(log.previousValue || {}).length ? "Changed" : ""}</td>
+  <td>${Object.keys(log.newValue || {}).length ? "Changed" : ""}</td>
+  <td>${log.details || ""}</td>
+  <td>${date}</td>
+  <td><button onclick='openModal(${JSON.stringify(log).replace(/'/g, "&apos;")})'>View</button></td>
+`;
+
+        table.appendChild(row);
+
+      });
+
+    }
+
+    // script for the modal screen display
+    function openModal(log) {
+      document.getElementById("modalTitle").innerText =
+        `${log.module} - ${log.action}`;
+
+      document.getElementById("modalPrevious").innerText =
+        JSON.stringify(log.previousValue || {}, null, 2);
+
+      document.getElementById("modalNew").innerText =
+        JSON.stringify(log.newValue || {}, null, 2);
+
+      document.getElementById("modalDetails").innerText =
+        log.details || "";
+
+      let formattedDateTime = "";
+      if (log.timestamp) {
+        const dt = new Date(log.timestamp);
+        const date = dt.toISOString().split("T")[0];
+        const time = dt.toTimeString().split(" ")[0]; // HH:MM:SS
+        formattedDateTime = `${date} ${time}`;
+      }
+
+      document.getElementById("modalDate").innerText = formattedDateTime;
+
+      document.getElementById("auditModal").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("auditModal").style.display = "none";
+    }
+
+    window.onclick = function (event) {
+      const modal = document.getElementById("auditModal");
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    function exportCSV() {
+
+      if (reportData.length === 0)
+        return alert("No data to export");
+
+      let csv =
+        "User,Module,Action,Previous Value,New Value,Details,Date\n";
+
+      reportData.forEach(log => {
+
+        const userName = log.user?.name || "System";
+
+        const prevValue = Object.entries(log.previousValue || {})
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(", ")
+
+        const newValue = Object.entries(log.newValue || {})
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(", ")
+
+        const date = log.timestamp
+          ? log.timestamp.split("T")[0]
+          : "";
+
+        csv += `"${userName}",`;
+        csv += `"${log.module}",`;
+        csv += `"${log.action}",`;
+        csv += `"${prevValue}",`;
+        csv += `"${newValue}",`;
+        csv += `"${log.details || ""}",`;
+        csv += `"${date}"\n`;
+
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "audit_report.csv";
+      a.click();
+    }
+
+    loadReport();
+
+  </script>
+
+  <!-- Modal screen-->
+  <div id="auditModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+
+      <h3 id="modalTitle"></h3>
+
+      <div class="modal-section">
+        <h4>Previous Value</h4>
+        <pre id="modalPrevious"></pre>
+      </div>
+
+      <div class="modal-section">
+        <h4>New Value</h4>
+        <pre id="modalNew"></pre>
+      </div>
+
+      <div class="modal-section">
+        <h4>Details</h4>
+        <p id="modalDetails"></p>
+      </div>
+
+      <div class="modal-section">
+        <h4>Date</h4>
+        <p id="modalDate"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- //---------------- -->
+</body>
+
+</html>
