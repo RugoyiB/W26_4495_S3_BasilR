@@ -1,87 +1,121 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Add Financial Record</title>
-  <script src="frontend/authGuard.js"></script>
+  <script src="authGuard.js"></script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
 
-<nav class="navbar">
-  <h2>Church Admin</h2>
-  <ul>
-    <li><a href="dashboard.html">Dashboard</a></li>
-    <li><a href="finance.html">Finance</a></li>
-    <li><a href="finance-report.html">Finance Report</a></li>
-  </ul>
-</nav>
+  <nav class="navbar">
+    <h2>Church Admin</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="finance.html">Finance</a></li>
+      <li><a href="finance-report.html">Finance Report</a></li>
+    </ul>
+  </nav>
 
-<div class="form-container">
-  <h2>Add Financial Record</h2>
+  <div class="form-container">
+    <h2>Add Financial Record</h2>
 
-  <select id="member"></select>
+    <select id="member"></select>
+    <input id="donorName" placeholder="Donor Name (if not a member)">
 
-  <input id="amount" type="number" placeholder="Amount">
+    <input id="amount" type="number" placeholder="Amount">
 
-  <select id="type">
-    <option value="">Select Type</option>
-    <option value="Tithe">Tithe</option>
-    <option value="Offering">Offering</option>
-    <option value="Donation">Donation</option>
-  </select>
+    <select id="type">
+      <option value="">Select Type</option>
+      <option value="Tithe">Tithe</option>
+      <option value="Offering">Offering</option>
+      <option value="Donation">Donation</option>
+    </select>
 
-  <select id="paymentMethod">
-    <option value="">Payment Method</option>
-    <option value="Cash">Cash</option>
-    <option value="Bank Transfer">Bank Transfer</option>
-    <option value="Mobile Money">Mobile Money</option>
-  </select>
+    <select id="paymentMethod">
+      <option value="">Payment Method</option>
+      <option value="Cash">Cash</option>
+      <option value="Bank Transfer">Bank Transfer</option>
+      <option value="Mobile Money">Mobile Money</option>
+    </select>
 
-  <input type="date" id="date">
-  <textarea id="notes" placeholder="Notes (optional)"></textarea>
+    <input type="date" id="date">
+    <textarea id="notes" placeholder="Notes (optional)"></textarea>
 
-  <button onclick="saveFinance()">Save</button>
-  <p id="message"></p>
-</div>
+    <button onclick="saveFinance()">Save</button>
+    <p id="message"></p>
+  </div>
 
-<script>
-  const API_FINANCE = "http://localhost:5000/api/finance";
-  const API_MEMBERS = "http://localhost:5000/api/members";
+  <script>
+    const API_FINANCE = "http://localhost:5000/api/finances";
+    const API_MEMBERS = "http://localhost:5000/api/members";
 
-  async function loadMembers() {
-    const res = await fetch(API_MEMBERS);
-    const members = await res.json();
+    async function loadMembers() {
+      const token = localStorage.getItem("token");
 
-    const select = document.getElementById("member");
-    members.forEach(m => {
-      select.innerHTML += `<option value="${m._id}">
+      const res = await fetch(API_MEMBERS, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      const members = await res.json();
+
+      const select = document.getElementById("member");
+
+      //Add default option
+      select.innerHTML = `<option value="">-- Non-Member / Guest --</option>`;
+
+      members.forEach(m => {
+        select.innerHTML += `<option value="${m._id}">
         ${m.firstName} ${m.lastName}
       </option>`;
-    });
-  }
+      });
+    }
 
-  async function saveFinance() {
-    const data = {
-      member: member.value,
-      amount: amount.value,
-      type: type.value,
-      paymentMethod: paymentMethod.value,
-      date: date.value,
-      notes: notes.value
-    };
+    async function saveFinance() {
+      const data = {
+        member: document.getElementById("member").value || null,
+        donorName: document.getElementById("donorName").value || null,
+        amount: parseFloat(document.getElementById("amount").value),
+        type: document.getElementById("type").value,
+        paymentMethod: document.getElementById("paymentMethod").value,
+        date: document.getElementById("date").value,
+        notes: document.getElementById("notes").value
+      };
 
-    await fetch(API_FINANCE, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+      const token = localStorage.getItem("token");
 
-    message.innerText = "Record saved successfully!";
-  }
+      if (!token) {
+        alert("Please log in.");
+        window.location.href = "login.html";
+        return;
+      }
 
-  loadMembers();
-</script>
+      try {
+        const res = await fetch(API_FINANCE, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+          document.getElementById("message").innerText = "Record saved successfully!";
+        } else {
+          const errorData = await res.json();
+          document.getElementById("message").innerText = errorData.message || "Error saving record.";
+        }
+      } catch (error) {
+        document.getElementById("message").innerText = "Network error. Please try again.";
+      }
+
+    }
+
+    loadMembers();
+  </script>
 
 </body>
+
 </html>
