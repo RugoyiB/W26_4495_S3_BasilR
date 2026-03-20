@@ -15,10 +15,13 @@ const ROLE_PERMISSIONS = {
   ],
   TREASURER: [
     "menu-dashboard",
+    "menu-members",
+    "menu-attendance",
     "menu-finance"
   ],
   STAFF: [
     "menu-dashboard",
-    "menu-members"
+    "menu-members",
+    "menu-attendance"
   ]
 };
