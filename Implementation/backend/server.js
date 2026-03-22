@@ -27,6 +27,7 @@ app.use("/api/attendance", require("./routes/attendance"));
 app.use("/api/chatbot", require("./routes/chatbot"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
+app.use("/api/finances", require("./routes/finances"));
 app.use("/api/audit", auditRoutes);
 
 // Default route → welcome.html
