@@ -5,6 +5,6 @@ const auth = require("../middleware/auth");
 const authorize = require("../middleware/authorize");
 const auditController = require("../controllers/auditController");
 
-router.get("/report", auth, authorize("ADMIN"), auditController.getAuditLogs);
+router.get("/report", auth, authorize("ADMIN","PASTOR"), auditController.getAuditLogs);
 
 module.exports = router;
