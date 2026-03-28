@@ -10,7 +10,7 @@ const {
   getAttendanceReport
 } = require("../controllers/attendanceController");
 
-// CRUD
+//CRUD
 router.post("/", auth, createAttendance);
 router.get("/", auth, getAllAttendance);
 
