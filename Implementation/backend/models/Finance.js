@@ -4,9 +4,9 @@ const financeSchema = new mongoose.Schema({
   member: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Member",
-    required: false // Allow null for non-members or guests
+    required: false //Allow null for non-members or guests
   },
-  donorName: { type: String }, // For non-members or guests
+  donorName: { type: String }, //For non-members or guests
   amount: {
     type: Number,
     required: true
