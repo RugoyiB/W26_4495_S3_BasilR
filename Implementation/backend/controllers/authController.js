@@ -30,6 +30,11 @@ exports.login = async (req, res) => {
     user._id
   );
 
+  //Mark user as active
+  user.isActive = true;
+  user.lastSeen = new Date();
+  await user.save();
+
   const token = jwt.sign(
     { id: user._id, role: user.role },
     process.env.JWT_SECRET,
