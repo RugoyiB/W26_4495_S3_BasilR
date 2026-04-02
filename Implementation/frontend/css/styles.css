@@ -94,3 +94,33 @@ button:hover {
   margin-top: 15px;
   font-weight: bold;
 }
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* space between options */
+}
+
+.status-container p {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.status-container label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* .status-container {
+  margin: 10px 0;
+}
+
+.status-container label {
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.status-container input {
+  margin-right: 5px;
+} */
