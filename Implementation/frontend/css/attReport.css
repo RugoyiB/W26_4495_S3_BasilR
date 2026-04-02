@@ -72,7 +72,8 @@ thead {
   background-color: #f0f2f5;
 }
 
-th, td {
+th,
+td {
   padding: 14px;
   text-align: left;
 }
@@ -118,46 +119,72 @@ button:hover {
   opacity: 0.7;
 }
 
+.icon-save {
+  color: green;
+  cursor: pointer;
+  transform: scale(1.5);
+}
+
+.icon-cancel {
+  color: red;
+  cursor: pointer;
+  transform: scale(1.5);
+}
+
 /* ----- */
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 9999;
-    padding-top: 80px;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background: rgba(0,0,0,0.5);
-  }
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  padding-top: 80px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.5);
+}
 
-  .modal-content {
-    background: #fff;
-    margin: auto;
-    padding: 20px;
-    width: 60%;
-    max-height: 80vh;
-    overflow-y: auto;
-    border-radius: 8px;
-    box-shadow: 0 0 10px #0003;
-  }
+.modal-content {
+  background: #fff;
+  margin: auto;
+  padding: 20px;
+  width: 60%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #0003;
+}
 
-  .close {
-    float: right;
-    font-size: 28px;
-    cursor: pointer;
-  }
+.close {
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
+}
 
-  .modal-section {
-    margin-bottom: 15px;
-  }
+.modal-section {
+  margin-bottom: 15px;
+}
 
-  pre {
-    background: #f4f4f4;
-    padding: 10px;
-    border-radius: 6px;
-    max-height: 300px;
-    overflow-y: auto;
-  }
+pre {
+  background: #f4f4f4;
+  padding: 10px;
+  border-radius: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
 
+.role-options {
+  display: flex;
+  flex-direction: column;   /* stack vertically */
+  gap: 8px;                 /* spacing between each option */
+}
+
+.role-options label {
+  display: flex;
+  align-items: center;
+}
+
+.role-options input[type="radio"] {
+  margin-right: 6px;
+}
