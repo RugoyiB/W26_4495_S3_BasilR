@@ -4,7 +4,7 @@
   background: white;
   padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .form-container h2 {
@@ -33,4 +33,31 @@
   margin-top: 15px;
   text-align: center;
   font-weight: bold;
+}
+
+.role-container {
+  margin: 10px 0;
+}
+
+.role-container p {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+/* Flexbox for the radio buttons */
+.role-options {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 260px; /* adjust to control row width */
+}
+
+.role-options label {
+  display: inline-flex;
+  align-items: center;
+  width: 50%;        /* forces exactly 2 per row */
+  margin-bottom: 8px;
+}
+
+.role-options input[type="radio"] {
+  margin-right: 6px;
 }
