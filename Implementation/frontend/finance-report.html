@@ -45,9 +45,20 @@
   </div>
 
   <script>
+    const params = new URLSearchParams(window.location.search);
+    const filter = params.get("filter");
     const REPORT_API = "http://localhost:5000/api/finances/report";
     const financeTable = document.getElementById("financeTable");
     const totalAmount = document.getElementById("totalAmount");
+
+    function getPreviousMonthRange() {
+      const now = new Date();
+
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth(), 0);
+
+      return { start, end };
+    }
 
     let reportData = [];
 
@@ -67,7 +78,27 @@
           "Authorization": `Bearer ${token}`
         }
       });
-      reportData = await res.json();
+
+      let data = await res.json();
+
+      //Apply previous month if no manual dates selected
+      if (!start && !end) {
+        const { start: prevStart, end: prevEnd } = getPreviousMonthRange();
+
+        data = data.filter(r => {
+          const d = new Date(r.date);
+          return d >= prevStart && d <= prevEnd;
+        });
+      }
+
+      // Apply filter if present
+      if (filter) {
+        data = data.filter(r =>
+          r.type === filter || r.paymentMethod === filter
+        );
+      }
+
+      reportData = data;
 
       let total = 0;
       financeTable.innerHTML = "";
