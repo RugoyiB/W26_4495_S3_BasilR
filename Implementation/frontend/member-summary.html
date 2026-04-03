@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Member Summary</title>
+  <link rel="stylesheet" href="css/attReport.css">
+  <link rel="stylesheet" href="css/membersummary.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <h2>Church Admin</h2>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="create-member.html">Create Member</a></li>
+      <li><a href="members.html">Member Report</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <div class="card" onclick="goToAllMembers()">
+      <div class="card-icon">
+        <i class="fa-solid fa-users"></i>
+      </div>
+      <h2 id="totalMembers">0</h2>
+      <p>Total Members</p>
+    </div>
+
+    <div class="card" onclick="goToFemaleMembers()">
+      <div class="card-icon female">
+        <i class="fa-solid fa-person-dress"></i>
+      </div>
+      <h2 id="femaleMembers">0</h2>
+      <p>Female Members</p>
+    </div>
+
+    <div class="card" onclick="goToMaleMembers()">
+      <div class="card-icon male">
+        <i class="fa-solid fa-person"></i>
+      </div>
+      <h2 id="maleMembers">0</h2>
+      <p>Male Members</p>
+    </div>
+
+    <div class="card" onclick="goToActiveMembers()">
+      <div class="card-icon active">
+        <i class="fa-solid fa-user-check"></i>
+      </div>
+      <h2 id="activeMembers">0</h2>
+      <p>Active Members</p>
+    </div>
+
+    <div class="card" onclick="goToInactiveMembers()">
+      <div class="card-icon inactive">
+        <i class="fa-solid fa-user-xmark"></i>
+      </div>
+      <h2 id="inactiveMembers">0</h2>
+      <p>Inactive Members</p>
+    </div>
+
+    <div class="card" onclick="goToTransferredMembers()">
+      <div class="card-icon transferred">
+        <i class="fa-solid fa-right-left"></i>
+      </div>
+      <h2 id="transferredMembers">0</h2>
+      <p>Transferred Members</p>
+    </div>
+
+  </div>
+
+  <!-- Floating Buttons -->
+  <div class="floating-buttons">
+    <button class="add-btn" onclick="goToCreateMember()">+</button>
+    <button class="report-btn" onclick="goToMemberReport()">📊</button>
+  </div>
+
+  <script>
+    const API_MEMBERS = "http://localhost:5000/api/members";
+    const token = localStorage.getItem("token");
+
+    async function loadMemberSummary() {
+      try {
+        const res = await fetch(API_MEMBERS, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const members = await res.json();
+
+        //Ensure it's an array
+        const data = Array.isArray(members) ? members : (members.data || []);
+
+        const total = data.length;
+
+        const female = data.filter(m => m.gender === "Female").length;
+        const male = data.filter(m => m.gender === "Male").length;
+
+        const active = data.filter(m => m.status === "Active").length;
+        const inactive = data.filter(m => m.status === "Inactive").length;
+        const transferred = data.filter(m => m.status === "Transferred").length;
+
+        document.getElementById("totalMembers").innerText = total;
+        document.getElementById("femaleMembers").innerText = female;
+        document.getElementById("maleMembers").innerText = male;
+        document.getElementById("activeMembers").innerText = active;
+        document.getElementById("inactiveMembers").innerText = inactive;
+        document.getElementById("transferredMembers").innerText = transferred;
+
+      } catch (err) {
+        console.error("Error loading member summary:", err);
+      }
+    }
+
+    function goToCreateMember() {
+      window.location.href = "add-member.html";
+    }
+
+    function goToMemberReport() {
+      window.location.href = "members.html";
+    }
+
+    function goToAllMembers() {
+      window.location.href = "members.html";
+    }
+
+    function goToFemaleMembers() {
+      window.location.href = "members.html?filter=Female";
+    }
+
+    function goToMaleMembers() {
+      window.location.href = "members.html?filter=Male";
+    }
+
+    function goToActiveMembers() {
+      window.location.href = "members.html?filter=Active";
+    }
+
+    function goToInactiveMembers() {
+      window.location.href = "members.html?filter=Inactive";
+    }
+
+    function goToTransferredMembers() {
+      window.location.href = "members.html?filter=Transferred";
+    }
+
+    loadMemberSummary();
+    setInterval(loadMemberSummary, 5000);
+  </script>
+
+</body>
+
+</html>
