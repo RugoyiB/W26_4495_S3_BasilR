@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Finance Summary</title>
+    <script src="authGuard.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/financesummary.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <h2>Church Admin</h2>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="add-finance.html">Add Finance</a></li>
+            <li><a href="finance-report.html">Finance Report</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="card" onclick="goToDonations()">
+            <div class="card-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+            <h2 id="totalDonations">0</h2>
+            <p>Total Donations</p>
+        </div>
+
+        <div class="card" onclick="goToTithes()">
+            <div class="card-icon"><i class="fa-solid fa-coins"></i></div>
+            <h2 id="totalTithes">0</h2>
+            <p>Total Tithes</p>
+        </div>
+
+        <div class="card" onclick="goToOfferings()">
+            <div class="card-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+            <h2 id="totalOfferings">0</h2>
+            <p>Total Offerings</p>
+        </div>
+
+        <div class="card" onclick="goToCashPayments()">
+            <div class="card-icon"><i class="fa-solid fa-money-bill"></i></div>
+            <h2 id="totalCash">0</h2>
+            <p>Cash Payments</p>
+        </div>
+
+        <div class="card" onclick="goToEtransferPayments()">
+            <div class="card-icon"><i class="fa-solid fa-paper-plane"></i></div>
+            <h2 id="totalEtransfer">0</h2>
+            <p>E-transfer Payments</p>
+        </div>
+
+        <div class="card" onclick="goToBankTransfers()">
+            <div class="card-icon"><i class="fa-solid fa-university"></i></div>
+            <h2 id="totalBank">0</h2>
+            <p>Bank Transfers</p>
+        </div>
+    </div>
+
+    <!-- Floating Buttons -->
+    <div class="floating-buttons">
+        <button class="add-btn" onclick="goToAddFinance()">+</button>
+        <button class="report-btn" onclick="goToFinanceReport()">📊</button>
+    </div>
+
+    <script>
+        const API_FINANCE = "http://localhost:5000/api/finances";
+        const token = localStorage.getItem("token");
+
+        async function fetchAmount(url) {
+            const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+            const data = await res.json();
+            console.log(url, data); // check the returned value
+
+            if (Array.isArray(data)) {
+                return data.reduce((sum, item) => sum + (item.amount || 0), 0);
+            }
+            return data.total ?? 0;
+        }
+
+        async function loadFinanceSummary() {
+            try {
+                const res = await fetch(API_FINANCE, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await res.json();
+                const now = new Date();
+
+                // First day of previous month
+                const startPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+                // Last day of previous month
+                const endPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+                const filteredData = data.filter(x => {
+                    const recordDate = new Date(x.date);
+                    return recordDate >= startPrevMonth && recordDate <= endPrevMonth;
+                });
+
+                const donations = filteredData
+                    .filter(x => x.type === "Donation")
+                    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+                const tithes = filteredData
+                    .filter(x => x.type === "Tithe")
+                    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+                const offerings = filteredData
+                    .filter(x => x.type === "Offering")
+                    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+                const cash = filteredData
+                    .filter(x => x.paymentMethod === "Cash")
+                    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+                const etransfer = filteredData
+                    .filter(x => x.paymentMethod === "E-transfer")
+                    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+                const bank = filteredData
+                    .filter(x => x.paymentMethod === "Bank Transfer")
+                    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+                document.getElementById("totalDonations").innerText = donations;
+                document.getElementById("totalTithes").innerText = tithes;
+                document.getElementById("totalOfferings").innerText = offerings;
+                document.getElementById("totalCash").innerText = cash;
+                document.getElementById("totalEtransfer").innerText = etransfer;
+                document.getElementById("totalBank").innerText = bank;
+
+            } catch (err) {
+                console.error("Error loading finance summary:", err);
+            }
+        }
+
+        // Navigation
+        function goToAddFinance() { window.location.href = "finance.html"; }
+        function goToFinanceReport() { window.location.href = "finance-report.html"; }
+        function goToDonations() { window.location.href = "finance-report.html?filter=Donation"; }
+        function goToTithes() { window.location.href = "finance-report.html?filter=Tithe"; }
+        function goToOfferings() { window.location.href = "finance-report.html?filter=Offering"; }
+        function goToCashPayments() { window.location.href = "finance-report.html?filter=Cash"; }
+        function goToEtransferPayments() { window.location.href = "finance-report.html?filter=E-transfer"; }
+        function goToBankTransfers() { window.location.href = "finance-report.html?filter=Bank Transfer"; }
+
+        loadFinanceSummary();
+        setInterval(loadFinanceSummary, 5000);
+    </script>
+</body>
+
+</html>
