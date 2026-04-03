@@ -18,8 +18,6 @@ function getChangedFields(oldData, newData) {
 
 // CREATE FINANCIAL RECORD
 exports.createFinance = async (req, res) => {
-  console.log("CREATE FINANCE CONTROLLER HIT");
-
   try {
     const date = new Date(req.body.date);
     date.setHours(12, 0, 0, 0);
@@ -35,10 +33,6 @@ exports.createFinance = async (req, res) => {
         select: "firstName lastName"
       })
       .lean();
-
-    console.log("RAW RECORD:", record);
-    console.log("POPULATED RECORD:", populatedRecord);
-    console.log("POPULATED MEMBER:", populatedRecord.member);
 
     await logAction(
       req,
