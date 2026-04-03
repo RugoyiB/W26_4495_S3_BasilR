@@ -8,6 +8,7 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
+    wpfi
   console.log("USER FOUND:", user);
   if (!user) {
     return res.status(401).json({ message: "Invalid credentials" });
@@ -18,7 +19,6 @@ exports.login = async (req, res) => {
   if (!isMatch) {
     return res.status(401).json({ message: "Invalid credentials" });
   }
-
   // Log login action
   await logAction(
     { user: { id: user._id }, ip: req.ip },
@@ -29,7 +29,6 @@ exports.login = async (req, res) => {
     null,
     user._id
   );
-
   //Mark user as active
   user.isActive = true;
   user.lastSeen = new Date();
@@ -44,6 +43,5 @@ exports.login = async (req, res) => {
   res.json({
     token,
     role: user.role
-    // name: user.name
   });
 };
