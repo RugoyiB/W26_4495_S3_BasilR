@@ -1,6 +1,3 @@
-
-
-// const mongoose = require("mongoose");
 const Finance = require("../models/Finance");
 const logAction = require("../services/auditLogger");
 
@@ -30,22 +27,13 @@ exports.createFinance = async (req, res) => {
     const record = new Finance({ ...req.body, date });
     await record.save();
 
-    // const record = new Finance({
-    //   ...req.body,
-    //   member: req.body.member
-    //     ? new mongoose.Types.ObjectId(req.body.member) //FORCE conversion
-    //     : null,
-    //   date
-    // });
-    // await record.save();
-
     // Populate member before logging
     const populatedRecord = await Finance.findById(record._id)
       .populate({
-    path: "member",
-    model: "Member",
-    select: "firstName lastName"
-  })
+        path: "member",
+        model: "Member",
+        select: "firstName lastName"
+      })
       .lean();
 
     console.log("RAW RECORD:", record);
@@ -124,10 +112,6 @@ exports.updateFinance = async (req, res) => {
       oldRecord.toObject(),
       updatedRecord.toObject()
     );
-
-    // if (req.body.member) {
-    //   req.body.member = new mongoose.Types.ObjectId(req.body.member);
-    // }
 
     await logAction(
       req,
