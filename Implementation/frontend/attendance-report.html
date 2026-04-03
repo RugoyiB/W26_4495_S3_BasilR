@@ -42,6 +42,10 @@
   </div>
 
   <script>
+    const params = new URLSearchParams(window.location.search);
+    const selectedDate = params.get("date");
+
+    console.log("Filter by date:", selectedDate);
     const REPORT_API = "http://localhost:5000/api/attendance/report";
     let reportData = [];
 
@@ -54,7 +58,6 @@
         url += `?startDate=${start}&endDate=${end}`;
       }
 
-      // const res = await fetch(url);
       const token = localStorage.getItem("token");
 
       const res = await fetch(url, {
@@ -62,7 +65,23 @@
           "Authorization": `Bearer ${token}`
         }
       });
-      reportData = await res.json();
+
+      let data = await res.json();
+
+      //Apply filter from summary card
+      if (selectedDate) {
+        const dateObj = new Date(selectedDate);
+        dateObj.setDate(dateObj.getDate() - 1);
+
+        const previousDate = dateObj.toISOString().split("T")[0];
+
+        document.getElementById("startDate").value = previousDate;
+        document.getElementById("endDate").value = selectedDate;
+
+        loadReport(); //run filtered report
+      }
+
+      reportData = data;
 
       const table = document.getElementById("reportTable");
       table.innerHTML = "";
