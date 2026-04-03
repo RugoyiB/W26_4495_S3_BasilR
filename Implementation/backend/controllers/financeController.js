@@ -1,3 +1,6 @@
+
+
+// const mongoose = require("mongoose");
 const Finance = require("../models/Finance");
 const logAction = require("../services/auditLogger");
 
@@ -18,6 +21,8 @@ function getChangedFields(oldData, newData) {
 
 // CREATE FINANCIAL RECORD
 exports.createFinance = async (req, res) => {
+  console.log("CREATE FINANCE CONTROLLER HIT");
+
   try {
     const date = new Date(req.body.date);
     date.setHours(12, 0, 0, 0);
@@ -25,17 +30,39 @@ exports.createFinance = async (req, res) => {
     const record = new Finance({ ...req.body, date });
     await record.save();
 
+    // const record = new Finance({
+    //   ...req.body,
+    //   member: req.body.member
+    //     ? new mongoose.Types.ObjectId(req.body.member) //FORCE conversion
+    //     : null,
+    //   date
+    // });
+    // await record.save();
+
+    // Populate member before logging
+    const populatedRecord = await Finance.findById(record._id)
+      .populate({
+    path: "member",
+    model: "Member",
+    select: "firstName lastName"
+  })
+      .lean();
+
+    console.log("RAW RECORD:", record);
+    console.log("POPULATED RECORD:", populatedRecord);
+    console.log("POPULATED MEMBER:", populatedRecord.member);
+
     await logAction(
       req,
       "CREATE",
       "Finance",
       "New finance record created",
       null,
-      record,
+      populatedRecord,
       record._id
     );
 
-    res.status(201).json(record);
+    res.status(201).json(populatedRecord);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -80,7 +107,9 @@ exports.getFinanceReport = async (req, res) => {
 // UPDATE FINANCIAL RECORD
 exports.updateFinance = async (req, res) => {
   try {
-    const oldRecord = await Finance.findById(req.params.id);
+    const oldRecord = await Finance.findById(req.params.id)
+      .populate("member", "firstName lastName");
+
     if (!oldRecord) {
       return res.status(404).json({ message: "Record not found" });
     }
@@ -89,12 +118,16 @@ exports.updateFinance = async (req, res) => {
       req.params.id,
       { $set: req.body },
       { new: true, runValidators: true }
-    );
+    ).populate("member", "firstName lastName");
 
     const { previous, updated } = getChangedFields(
       oldRecord.toObject(),
       updatedRecord.toObject()
     );
+
+    // if (req.body.member) {
+    //   req.body.member = new mongoose.Types.ObjectId(req.body.member);
+    // }
 
     await logAction(
       req,
