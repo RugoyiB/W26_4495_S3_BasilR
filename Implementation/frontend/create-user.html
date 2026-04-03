@@ -26,14 +26,17 @@
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
 
-    <select id="role">
-      <option value="STAFF">Staff</option>
-      <option value="PASTOR">Pastor</option>
-      <option value="TREASURER">Treasurer</option>
-      <option value="ADMIN">Admin</option>
-    </select>
+    <div class="role-container">
+      <p>Select Role:</p>
+      <div class="role-options">
+        <label><input type="radio" name="role" value="STAFF"> Staff</label>
+        <label><input type="radio" name="role" value="PASTOR"> Pastor</label>
+        <label><input type="radio" name="role" value="TREASURER"> Treasurer</label>
+        <label><input type="radio" name="role" value="ADMIN"> Admin</label>
+      </div>
+    </div>
 
-    <button type="button" onclick="createUser()">Create User</button>
+    <button type="button" onclick="createUser()">Add User</button>
     <p id="message"></p>
   </div>
 
