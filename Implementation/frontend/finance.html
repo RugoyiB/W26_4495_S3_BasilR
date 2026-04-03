@@ -19,31 +19,34 @@
   </nav>
 
   <div class="form-container">
-    <h2>Add Financial Record</h2>
+    <h2>Add Record</h2>
 
     <select id="member"></select>
     <input id="donorName" placeholder="Donor Name (if not a member)">
 
     <input id="amount" type="number" placeholder="Amount">
-
-    <select id="type">
-      <option value="">Select Type</option>
-      <option value="Tithe">Tithe</option>
-      <option value="Offering">Offering</option>
-      <option value="Donation">Donation</option>
-    </select>
-
-    <select id="paymentMethod">
-      <option value="">Payment Method</option>
-      <option value="Cash">Cash</option>
-      <option value="Bank Transfer">Bank Transfer</option>
-      <option value="Mobile Money">Mobile Money</option>
-    </select>
-
     <input type="date" id="date">
+
+
+    <!-- Select Type -->
+    <div class="radio-group">
+      <p>Select Type:</p>
+      <label><input type="radio" name="type" value="Tithe"> Tithe</label>
+      <label><input type="radio" name="type" value="Offering"> Offering</label>
+      <label><input type="radio" name="type" value="Donation"> Donation</label>
+    </div>
+
+    <!-- Payment Method -->
+    <div class="radio-group">
+      <p>Payment Method:</p>
+      <label><input type="radio" name="paymentMethod" value="Cash"> Cash</label>
+      <label><input type="radio" name="paymentMethod" value="Bank Transfer"> Bank Transfer</label>
+      <label><input type="radio" name="paymentMethod" value="E-transfer"> E-transfer</label>
+    </div>
+
     <textarea id="notes" placeholder="Notes (optional)"></textarea>
 
-    <button onclick="saveFinance()">Save</button>
+    <button onclick="saveFinance()">Add Record</button>
     <p id="message"></p>
   </div>
 
@@ -77,8 +80,8 @@
         member: document.getElementById("member").value || null,
         donorName: document.getElementById("donorName").value || null,
         amount: parseFloat(document.getElementById("amount").value),
-        type: document.getElementById("type").value,
-        paymentMethod: document.getElementById("paymentMethod").value,
+        type: document.querySelector('input[name="type"]:checked')?.value || "",
+        paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || "",
         date: document.getElementById("date").value,
         notes: document.getElementById("notes").value
       };
