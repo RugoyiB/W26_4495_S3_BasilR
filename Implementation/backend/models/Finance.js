@@ -18,7 +18,7 @@ const financeSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["Cash", "Bank Transfer", "Mobile Money"],
+    enum: ["Cash", "Bank Transfer", "E-transfer"],
     required: true
   },
   date: {
