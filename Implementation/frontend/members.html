@@ -23,7 +23,7 @@
   </nav>
 
   <div class="table-container">
-    <h2>Church Members</h2>
+    <h2 id="reportTitle">Church Members</h2>
     <div class="filters">
       <button onclick="exportCSV()">Export CSV</button>
     </div>
@@ -49,41 +49,62 @@
   </div>
 
   <script>
+    const params = new URLSearchParams(window.location.search);
+    const filter = params.get("filter");
     const API_URL = "http://localhost:5000/api/members";
     const token = localStorage.getItem("token");
     let membersData = []; // GLOBAL storage for CSV
 
     // Load members
     async function loadMembers() {
-      const token = localStorage.getItem("token");
       const response = await fetch(API_URL, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
       });
       const members = await response.json();
-      membersData = members; //store for CSV
+      // membersData = members; //store for CSV
+
+      //APPLY FILTERING
+      let filteredMembers = members;
+
+      if (filter) {
+        filteredMembers = members.filter(m =>
+          m.gender === filter || m.status === filter
+        );
+      }
+
+      //UPDATE TITLE
+      const title = document.getElementById("reportTitle");
+      if (filter) {
+        title.innerText = `${filter} Members`;
+      } else {
+        title.innerText = "All Members";
+      }
+
+      membersData = filteredMembers;
 
       const table = document.getElementById("membersTable");
       table.innerHTML = "";
 
-      members.forEach(member => {
+      filteredMembers.forEach(member => {
         const row = document.createElement("tr");
+        row.setAttribute("data-id", member._id);
 
         row.innerHTML = `
-          <td>${member.firstName}</td>
-          <td>${member.lastName}</td>
-          <td>${member.gender || ""}</td>
-          <td>${member.phone || ""}</td>
-          <td>${member.email || ""}</td>
-          <td>${member.address || ""}</td>
-          <td>${member.joinDate ? member.joinDate.split("T")[0] : ""}</td>
-          <td>${member.status}</td>
-          <td class="actions">
-            <i class="fa-solid fa-pen" onclick="editMember('${member._id}')"></i>
-            <i class="fa-solid fa-trash" onclick="deleteMember('${member._id}')"></i>
-          </td>
-        `;
+        <td class="firstName">${member.firstName}</td>
+        <td class="lastName">${member.lastName}</td>
+        <td class="gender">${member.gender}</td>
+        <td class="phone">${member.phone || ""}</td>
+        <td class="email">${member.email || ""}</td>
+        <td class="address">${member.address || ""}</td>
+        <td class="joinDate">${member.joinDate ? member.joinDate.split("T")[0] : ""}</td>
+        <td class="status">${member.status}</td>
+        <td class="actions">
+        <i class="fa-solid fa-pen" onclick="enableEdit(this, '${member._id}')"></i>
+        <i class="fa-solid fa-trash" onclick="deleteMember('${member._id}')"></i>
+        </td>
+`;
 
         table.appendChild(row);
       });
@@ -117,6 +138,122 @@
 
       alert("Member Deleted Successfully");
       loadMembers();
+    }
+
+    function enableEdit(icon, memberId) {
+      const row = icon.closest("tr");
+
+      // Store original values
+      row.dataset.firstName = row.querySelector(".firstName").innerText;
+      row.dataset.lastName = row.querySelector(".lastName").innerText;
+      row.dataset.gender = row.querySelector(".gender").innerText;
+      row.dataset.phone = row.querySelector(".phone").innerText;
+      row.dataset.email = row.querySelector(".email").innerText;
+      row.dataset.address = row.querySelector(".address").innerText;
+      row.dataset.status = row.querySelector(".status").innerText;
+
+      // Editable fields
+      row.querySelector(".firstName").contentEditable = true;
+      row.querySelector(".lastName").contentEditable = true;
+      row.querySelector(".phone").contentEditable = true;
+      row.querySelector(".email").contentEditable = true;
+      row.querySelector(".address").contentEditable = true;
+
+      // Gender radio buttons
+      const genderCell = row.querySelector(".gender");
+      const currentGender = genderCell.innerText;
+
+      genderCell.innerHTML = `
+    <div class="role-options">
+      <label><input type="radio" name="gender-${memberId}" value="Male" ${currentGender === 'Male' ? 'checked' : ''}> Male</label>
+      <label><input type="radio" name="gender-${memberId}" value="Female" ${currentGender === 'Female' ? 'checked' : ''}> Female</label>
+      <label><input type="radio" name="gender-${memberId}" value="Other" ${currentGender === 'Other' ? 'checked' : ''}> Other</label>
+      </div>
+    `;
+
+      // Status Radio Buttons
+      const statusCell = row.querySelector(".status");
+      const currentStatus = statusCell.innerText;
+
+      statusCell.innerHTML = `
+    <div class="role-options">
+      <label><input type="radio" name="status-${memberId}" value="Active" ${currentStatus === 'Active' ? 'checked' : ''}> Active</label>
+  <label><input type="radio" name="status-${memberId}" value="Inactive" ${currentStatus === 'Inactive' ? 'checked' : ''}> Inactive</label>
+  <label><input type="radio" name="status-${memberId}" value="Transferred" ${currentStatus === 'Transferred' ? 'checked' : ''}> Transferred</label>
+  </div>
+    `;
+
+      row.style.backgroundColor = "#fff3cd";
+
+      const actionsCell = row.querySelector(".actions");
+      actionsCell.innerHTML = `
+      <i class="fa-solid fa-check icon-save" onclick="saveEdit(this, '${memberId}')"></i>
+      <i class="fa-solid fa-times icon-cancel" onclick="cancelEdit(this)"></i>
+    `;
+    }
+
+    async function saveEdit(icon, memberId) {
+      const row = icon.closest("tr");
+
+      const updatedData = {
+        firstName: row.querySelector(".firstName").innerText,
+        lastName: row.querySelector(".lastName").innerText,
+        gender: row.querySelector(`input[name="gender-${memberId}"]:checked`).value,
+        phone: row.querySelector(".phone").innerText,
+        email: row.querySelector(".email").innerText,
+        address: row.querySelector(".address").innerText,
+        status: row.querySelector(`input[name="status-${memberId}"]:checked`).value
+      };
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/members/${memberId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(updatedData)
+        });
+
+        if (!res.ok) throw new Error("Update failed");
+
+        // Reset UI
+        row.querySelector(".gender").innerText = updatedData.gender;
+        row.querySelector(".status").innerText = updatedData.status;
+
+        row.style.backgroundColor = "";
+
+        const actionsCell = row.querySelector(".actions");
+        actionsCell.innerHTML = `
+          <i class="fa-solid fa-pen" onclick="enableEdit(this, '${memberId}')"></i>
+          <i class="fa-solid fa-trash" onclick="deleteMember('${memberId}')"></i>
+        `;
+
+      } catch (err) {
+        alert("Error saving member");
+      }
+    }
+
+    function cancelEdit(icon) {
+      const row = icon.closest("tr");
+
+      row.querySelector(".firstName").innerText = row.dataset.firstName;
+      row.querySelector(".lastName").innerText = row.dataset.lastName;
+      row.querySelector(".gender").innerText = row.dataset.gender;
+      row.querySelector(".phone").innerText = row.dataset.phone;
+      row.querySelector(".email").innerText = row.dataset.email;
+      row.querySelector(".address").innerText = row.dataset.address;
+      row.querySelector(".status").innerText = row.dataset.status;
+
+      row.style.backgroundColor = "";
+
+      const memberId = row.getAttribute("data-id");
+
+      const actionsCell = row.querySelector(".actions");
+      actionsCell.innerHTML = `
+      <i class="fa-solid fa-pen" onclick="enableEdit(this, '${memberId}')"></i>
+      <i class="fa-solid fa-trash" onclick="deleteMember('${memberId}')"></i>
+    `;
     }
 
     function exportCSV() {
