@@ -2,7 +2,7 @@ async function createUser() {
   const nameInput = document.getElementById("name");
   const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
-  const roleInput = document.getElementById("role");
+  const roleInput = document.querySelector('input[name="role"]:checked').value;
   const msg = document.getElementById("message");
 
   // Validation
