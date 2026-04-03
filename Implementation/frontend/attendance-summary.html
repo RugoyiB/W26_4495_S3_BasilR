@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Summary</title>
+    <link rel="stylesheet" href="css/attReport.css">
+    <link rel="stylesheet" href="css/attendancesummary.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <h2>Church Admin</h2>
+        <ul>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="attendance.html">Attendance</a></li>
+            <li><a href="attendance-report.html">Report</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+
+        <!-- Attendance Card -->
+        <div class="card" onclick="goToCurrAttendance()">
+            <div class="card-icon attendance">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
+            <h2 id="attendanceCount">0</h2>
+            <p>Last Meeting Attendance</p>
+        </div>
+
+    </div>
+
+    <!-- Floating Buttons -->
+    <div class="floating-buttons">
+        <button class="add-btn" onclick="goToAddAttendance()">+</button>
+        <button class="report-btn" onclick="goToAttendanceReport()">📊</button>
+    </div>
+
+    <script>
+        const API_ATTENDANCE = "http://localhost:5000/api/attendance";
+        const token = localStorage.getItem("token");
+
+        let latestMeetingDate = null;
+
+        async function loadAttendanceSummary() {
+            try {
+                const res = await fetch(API_ATTENDANCE, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                const data = await res.json();
+
+                // Ensure array
+                const attendanceList = Array.isArray(data) ? data : (data.data || []);
+
+                if (attendanceList.length === 0) {
+                    document.getElementById("attendanceCount").innerText = 0;
+                    return;
+                }
+
+                //Get latest meeting date
+                latestMeetingDate = attendanceList
+                    .map(a => new Date(a.date))
+                    .sort((a, b) => b - a)[0];
+
+                //Count attendees from latest meeting
+                const latestAttendance = attendanceList.filter(a =>
+                    new Date(a.date).toDateString() === latestMeetingDate.toDateString()
+                );
+
+                document.getElementById("attendanceCount").innerText = latestAttendance.length;
+
+            } catch (err) {
+                console.error("Error loading attendance summary:", err);
+            }
+        }
+
+        function goToCurrAttendance() {
+            if (!latestMeetingDate) return;
+
+            // Format date (YYYY-MM-DD)
+            const formattedDate = latestMeetingDate.toISOString().split("T")[0];
+
+            window.location.href = `attendance-report.html?date=${formattedDate}`;
+        }
+
+        function goToAddAttendance() {
+            window.location.href = "attendance.html";
+        }
+
+        function goToAttendanceReport() {
+            window.location.href = "attendance-report.html";
+        }
+
+        loadAttendanceSummary();
+        setInterval(loadAttendanceSummary, 5000);
+    </script>
+
+</body>
+
+</html>
