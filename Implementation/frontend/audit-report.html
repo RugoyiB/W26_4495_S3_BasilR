@@ -125,16 +125,87 @@
 
     }
 
+    function formatMember(member) {
+      if (!member) return "-";
+
+      // If populated object
+      if (typeof member === "object") {
+        return `${member.firstName || ""} ${member.lastName || ""}`.trim();
+      }
+
+      // If still just an ID
+      return "Member ID: " + member;
+    }
+
+    function formatChanges(prev = {}, curr = {}) {
+      prev = prev || {};
+      curr = curr || {};
+
+      let html = `<table class="audit-table">
+                <tr>
+                  <th>Field</th>
+                  <th>Previous</th>
+                  <th>New</th>
+                </tr>`;
+
+      const ignoreFields = ["_id", "__v"]; //hide these
+
+      const allKeys = new Set([
+        ...Object.keys(prev),
+        ...Object.keys(curr)
+      ]);
+
+      if (allKeys.size === 0) {
+        return "<p>No changes available</p>";
+      }
+
+      allKeys.forEach(key => {
+        if (ignoreFields.includes(key)) return;
+
+        let oldVal = prev[key];
+        let newVal = curr[key];
+
+        //Convert member object → readable name
+        if (key === "member") {
+          oldVal = formatMember(oldVal);
+          newVal = formatMember(newVal);
+        }
+
+        // Handle null/empty
+        oldVal = oldVal ?? "-";
+        newVal = newVal ?? "-";
+
+        // Only show changed fields (optional)
+        if (oldVal !== newVal) {
+          html += `
+        <tr>
+          <td>${formatLabel(key)}</td>
+          <td>${oldVal}</td>
+          <td>${newVal}</td>
+        </tr>
+      `;
+        }
+      });
+
+      html += `</table>`;
+      return html;
+    }
+
+    // Make labels user-friendly
+    function formatLabel(key) {
+      return key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase());
+    }
+
     // script for the modal screen display
     function openModal(log) {
       document.getElementById("modalTitle").innerText =
         `${log.module} - ${log.action}`;
 
-      document.getElementById("modalPrevious").innerText =
-        JSON.stringify(log.previousValue || {}, null, 2);
+      document.getElementById("modalChanges").innerHTML =
+        formatChanges(log.previousValue || {}, log.newValue || {});
 
-      document.getElementById("modalNew").innerText =
-        JSON.stringify(log.newValue || {}, null, 2);
 
       document.getElementById("modalDetails").innerText =
         log.details || "";
@@ -219,13 +290,8 @@
       <h3 id="modalTitle"></h3>
 
       <div class="modal-section">
-        <h4>Previous Value</h4>
-        <pre id="modalPrevious"></pre>
-      </div>
-
-      <div class="modal-section">
-        <h4>New Value</h4>
-        <pre id="modalNew"></pre>
+        <h4>Changes</h4>
+        <div id="modalChanges"></div>
       </div>
 
       <div class="modal-section">
