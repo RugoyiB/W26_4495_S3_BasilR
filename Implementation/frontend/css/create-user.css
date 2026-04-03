@@ -46,18 +46,42 @@
 
 /* Flexbox for the radio buttons */
 .role-options {
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 260px; /* adjust to control row width */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 140px));
+  /*repeat(2, 1fr); /* 2 per row */
+  gap: 8px 20px;
+  /* vertical + horizontal spacing */
+  justify-content: start;
+  margin-top: 6px;
 }
 
 .role-options label {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  width: 50%;        /* forces exactly 2 per row */
-  margin-bottom: 8px;
+  justify-content: flex-start;
+  /* keep radio + text left */
+  text-align: left;
 }
 
 .role-options input[type="radio"] {
-  margin-right: 6px;
+  margin-left: 6px;
+}
+
+.floating-buttons button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-btn {
+  background: #28a745;
+}
+
+.report-btn {
+  background: #17a2b8;
 }
