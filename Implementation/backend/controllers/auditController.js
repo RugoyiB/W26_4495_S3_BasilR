@@ -14,6 +14,8 @@ exports.getAuditLogs = async (req, res) => {
     }
 
     const logs = await AuditLog.find(filter)
+      .populate("newValue.member", "firstName lastName")
+      .populate("previousValue.member", "firstName lastName")
       .populate("user", "name")
       .sort({ timestamp: -1 });
 
