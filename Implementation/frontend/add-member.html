@@ -25,13 +25,15 @@
     <input id="firstName" placeholder="First Name">
     <input id="lastName" placeholder="Last Name">
 
-    <!-- Gender Dropdown -->
-    <select id="gender">
-      <option value="">Select Gender</option>
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-      <option value="Other">Other</option>
-    </select>
+    <!-- Gender Radio buttons -->
+    <div class="radio-group">
+      <label>
+        <p>Gender:</p>
+      </label>
+      <label><input type="radio" name="gender" value="Male"> Male</label>
+      <label><input type="radio" name="gender" value="Female"> Female</label>
+      <label><input type="radio" name="gender" value="Other"> Other</label>
+    </div>
 
     <input id="phone" placeholder="Phone Number" inputmode="numeric" pattern="[0-9]*"
       oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
@@ -41,14 +43,17 @@
     <!-- Join Date Calendar -->
     <input type="date" id="joinDate">
 
-    <!-- Status Dropdown -->
-    <select id="status">
-      <option value="Active" selected>Active</option>
-      <option value="Inactive">Inactive</option>
-      <option value="Transferred">Transferred</option>
-    </select>
+    <!-- Status Radio buttons -->
+    <div class="radio-group">
+      <label>
+        <p>Status:</p>
+      </label>
+      <label><input type="radio" name="status" value="Active" checked> Active</label>
+      <label><input type="radio" name="status" value="Inactive"> Inactive</label>
+      <label><input type="radio" name="status" value="Transferred"> Transferred</label>
+    </div>
 
-    <button onclick="addMember()">Save</button>
+    <button onclick="addMember()">Add Member</button>
 
     <p id="message"></p>
 
@@ -61,12 +66,12 @@
       const memberData = {
         firstName: document.getElementById("firstName").value,
         lastName: document.getElementById("lastName").value,
-        gender: document.getElementById("gender").value,
+        gender: document.querySelector('input[name="gender"]:checked')?.value || "",
         phone: document.getElementById("phone").value,
         email: document.getElementById("email").value,
         address: document.getElementById("address").value,
         joinDate: document.getElementById("joinDate").value,
-        status: document.getElementById("status").value || "Active"
+        status: document.querySelector('input[name="status"]:checked')?.value || "Active"
       };
 
       try {
@@ -89,12 +94,12 @@
 
         document.getElementById("firstName").value = "";
         document.getElementById("lastName").value = "";
-        document.getElementById("gender").value = "";
+        document.querySelectorAll('input[name="gender"]').forEach(r => r.checked = false);
         document.getElementById("phone").value = "";
         document.getElementById("email").value = "";
         document.getElementById("address").value = "";
         document.getElementById("joinDate").value = "";
-        document.getElementById("status").value || "Active";
+        document.querySelector('input[name="status"][value="Active"]').checked = true;
       } catch (error) {
         document.getElementById("message").innerText =
           "Error: " + error.message;
