@@ -174,10 +174,10 @@ pre {
   overflow-y: auto;
 }
 
-.role-options {
+.role {
   display: flex;
-  flex-direction: column;   /* stack vertically */
-  gap: 8px;                 /* spacing between each option */
+  flex-direction: column;
+  gap: 8px;
 }
 
 .role-options label {
