@@ -28,12 +28,13 @@
 
     <input type="date" id="date">
 
-    <select id="status">
-      <option value="Present">Present</option>
-      <option value="Absent">Absent</option>
-    </select>
+    <div class="status-container">
+      <p>Status:</p>
+      <label><input type="radio" name="status" value="Present" checked>Present</label>
+      <label><input type="radio" name="status" value="Absent">Absent</label>
+    </div>
 
-    <button onclick="markAttendance()">Save Attendance</button>
+    <button onclick="markAttendance()">Add Attendance</button>
     <p id="message"></p>
   </div>
 
@@ -69,11 +70,12 @@
     // Save attendance
     async function markAttendance() {
       const token = localStorage.getItem("token");
+      const selectedStatus = document.querySelector('input[name="status"]:checked');
 
       const data = {
         member: document.getElementById("member").value,
         date: document.getElementById("date").value,
-        status: document.getElementById("status").value
+        status: selectedStatus ? selectedStatus.value : null
       };
 
       const res = await fetch(ATTENDANCE_API, {
