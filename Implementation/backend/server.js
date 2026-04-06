@@ -10,10 +10,10 @@ const app = express();
 
 global.churchContent = "";
 
-// Connect to MongoDB
+//Connect to MongoDB
 connectDB();
 
-// Middleware
+//Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -21,7 +21,7 @@ app.use(express.json());
   global.churchContent = await fetchAllChurchContent();
 })();
 
-// Routes
+//Routes
 app.use("/api/members", require("./routes/members"));
 app.use("/api/attendance", require("./routes/attendance"));
 app.use("/api/chatbot", require("./routes/chatbot"));
