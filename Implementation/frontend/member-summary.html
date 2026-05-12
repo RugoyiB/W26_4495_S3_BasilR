@@ -47,6 +47,24 @@
       <p>Men</p>
     </div>
 
+
+    <div class="card" onclick="goToBoys()">
+      <div class="card-icon male">
+        <i class="fa-solid fa-child"></i>
+      </div>
+      <h2 id="boysCount">0</h2>
+      <p>Boys</p>
+    </div>
+
+    <div class="card" onclick="goToGirls()">
+      <div class="card-icon female">
+        <i class="fa-solid fa-child-dress"></i>
+      </div>
+      <h2 id="girlsCount">0</h2>
+      <p>Girls</p>
+    </div>
+
+
     <div class="card" onclick="goToActiveMembers()">
       <div class="card-icon active">
         <i class="fa-solid fa-user-check"></i>
@@ -96,8 +114,16 @@
 
         const total = data.length;
 
-        const female = data.filter(m => m.gender === "Female").length;
-        const male = data.filter(m => m.gender === "Male").length;
+        // const female = data.filter(m => m.gender === "Female").length;
+        // const male = data.filter(m => m.gender === "Male").length;
+
+        // Adults only
+        const female = data.filter(m => m.gender === "Female" && !m.isChild).length;
+        const male = data.filter(m => m.gender === "Male" && !m.isChild).length;
+
+        // Children only
+        const boys = data.filter(m => m.gender === "Male" && m.isChild).length;
+        const girls = data.filter(m => m.gender === "Female" && m.isChild).length;
 
         const active = data.filter(m => m.status === "Active").length;
         const inactive = data.filter(m => m.status === "Inactive").length;
@@ -106,6 +132,8 @@
         document.getElementById("totalMembers").innerText = total;
         document.getElementById("femaleMembers").innerText = female;
         document.getElementById("maleMembers").innerText = male;
+        document.getElementById("boysCount").innerText = boys;
+        document.getElementById("girlsCount").innerText = girls;
         document.getElementById("activeMembers").innerText = active;
         document.getElementById("inactiveMembers").innerText = inactive;
         document.getElementById("transferredMembers").innerText = transferred;
@@ -133,6 +161,14 @@
 
     function goToMaleMembers() {
       window.location.href = "members.html?filter=Male";
+    }
+
+    function goToBoys() {
+      window.location.href = "members.html?filter=Boys";
+    }
+
+    function goToGirls() {
+      window.location.href = "members.html?filter=Girls";
     }
 
     function goToActiveMembers() {
