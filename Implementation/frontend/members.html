@@ -40,6 +40,7 @@
           <th>Address</th>
           <th>Join Date</th>
           <th>Status</th>
+          <th>Children</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -64,17 +65,31 @@
         }
       });
       const members = await response.json();
-      // membersData = members; //store for CSV
 
       //APPLY FILTERING
       let filteredMembers = members;
-
       if (filter) {
-        filteredMembers = members.filter(m =>
-          m.gender === filter || m.status === filter
-        );
-      }
 
+        if (filter === "Boys") {
+
+          filteredMembers = members.filter(m =>
+            m.isChild && m.gender === "Male"
+          );
+
+        } else if (filter === "Girls") {
+
+          filteredMembers = members.filter(m =>
+            m.isChild && m.gender === "Female"
+          );
+
+        } else {
+
+          filteredMembers = members.filter(m =>
+            m.gender === filter || m.status === filter
+          );
+
+        }
+      }
       //UPDATE TITLE
       const title = document.getElementById("reportTitle");
       if (filter) {
@@ -89,8 +104,60 @@
       table.innerHTML = "";
 
       filteredMembers.forEach(member => {
+        // Skip children ONLY when not viewing Boys/Girls filters
+        if (member.isChild && filter !== "Boys" && filter !== "Girls") return;
+
         const row = document.createElement("tr");
         row.setAttribute("data-id", member._id);
+
+        // Find children belonging to this parent
+        // Only parents can have children displayed
+        let children = [];
+
+        if (!member.isChild) {
+          children = members.filter(child =>
+            child.isChild === true &&
+            child.parentMember === member._id
+          );
+        }
+
+        // Build children display
+        let childrenHTML = `<span class="no-children">No Children</span>`;
+
+        if (children.length > 0) {
+          childrenHTML = children.map(child => {
+
+            // Calculate age from dateOfBirth
+            let age = "";
+
+            if (child.dateOfBirth) {
+              const dob = new Date(child.dateOfBirth);
+              const today = new Date();
+
+              age = today.getFullYear() - dob.getFullYear();
+
+              const monthDiff = today.getMonth() - dob.getMonth();
+
+              if (
+                monthDiff < 0 ||
+                (monthDiff === 0 && today.getDate() < dob.getDate())
+              ) {
+                age--;
+              }
+            }
+
+            return `
+      <div class="child-row" data-child-id="${child._id}">
+
+        <div class="child-details">
+           
+          <span class="child-firstName">${child.firstName}</span>
+          <span class="child-lastName">${child.lastName}</span>
+          <span class="child-age">(${age} yrs)</span>
+        </div>
+    `;
+          }).join("");
+        }
 
         row.innerHTML = `
         <td class="firstName">${member.firstName}</td>
@@ -101,6 +168,7 @@
         <td class="address">${member.address || ""}</td>
         <td class="joinDate">${member.joinDate ? member.joinDate.split("T")[0] : ""}</td>
         <td class="status">${member.status}</td>
+        <td class="children">${member.isChild ? `<span class="child-label">Child Member</span>` : childrenHTML}</td>
         <td class="actions">
         <i class="fa-solid fa-pen" onclick="enableEdit(this, '${member._id}')"></i>
         <i class="fa-solid fa-trash" onclick="deleteMember('${member._id}')"></i>
@@ -160,6 +228,21 @@
       row.querySelector(".email").contentEditable = true;
       row.querySelector(".address").contentEditable = true;
 
+      // Enable editing for children
+      row.querySelectorAll(".child-row").forEach(childRow => {
+        const childFirstNames = childRow.querySelector(".child-firstName");
+        const childLastNames = childRow.querySelector(".child-lastName");
+
+        // Store original child values
+        childRow.dataset.originalFirstName = childFirstNames.innerText;
+        childRow.dataset.originalLastName = childLastNames.innerText;
+
+        // Enable editing
+        childFirstNames.contentEditable = true;
+        childLastNames.contentEditable = true;
+
+      });
+
       // Gender radio buttons
       const genderCell = row.querySelector(".gender");
       const currentGender = genderCell.innerText;
@@ -206,6 +289,19 @@
         status: row.querySelector(`input[name="status-${memberId}"]:checked`).value
       };
 
+      // Collect updated children
+      const updatedChildren = [];
+
+      row.querySelectorAll(".child-row").forEach(childRow => {
+
+        updatedChildren.push({
+          _id: childRow.dataset.childId,
+          firstName: childRow.querySelector(".child-firstName").innerText.trim(),
+          lastName: childRow.querySelector(".child-lastName").innerText.trim()
+        });
+
+      });
+
       try {
         const res = await fetch(`http://localhost:5000/api/members/${memberId}`, {
           method: "PUT",
@@ -233,6 +329,24 @@
       } catch (err) {
         alert("Error saving member");
       }
+
+      // Save children
+      for (const child of updatedChildren) {
+
+        await fetch(`${API_URL}/${child._id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            firstName: child.firstName,
+            lastName: child.lastName
+          })
+        });
+
+      }
+
     }
 
     function cancelEdit(icon) {
@@ -255,6 +369,24 @@
       <i class="fa-solid fa-pen" onclick="enableEdit(this, '${memberId}')"></i>
       <i class="fa-solid fa-trash" onclick="deleteMember('${memberId}')"></i>
     `;
+
+      // Restore original child values
+      row.querySelectorAll(".child-row").forEach(childRow => {
+
+        const firstName = childRow.querySelector(".child-firstName");
+        const lastName = childRow.querySelector(".child-lastName");
+
+        // Restore original values
+        firstName.innerText = childRow.dataset.originalFirstName;
+        lastName.innerText = childRow.dataset.originalLastName;
+
+        // Disable editing
+        firstName.contentEditable = false;
+        lastName.contentEditable = false;
+
+        firstName.style.backgroundColor = "";
+        lastName.style.backgroundColor = "";
+      });
     }
 
     function exportCSV() {
