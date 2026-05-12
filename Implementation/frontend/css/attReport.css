@@ -188,3 +188,31 @@ pre {
 .role-options input[type="radio"] {
   margin-right: 6px;
 }
+
+.children {
+  min-width: 200px;
+}
+
+.child-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  padding: 6px;
+}
+
+.child-firstName,
+.child-lastName {
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.child-age {
+  font-size: 14px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.no-children {
+  color: gray;
+  font-style: italic;
+}
