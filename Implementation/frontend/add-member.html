@@ -22,6 +22,24 @@
 
     <h2>Add Member</h2>
 
+    <!-- MEMBER TYPE -->
+    <div class="radio-group">
+      <label>
+        <p>Member Type:</p>
+      </label>
+
+      <label>
+        <input type="radio" name="memberType" value="Adult" checked onchange="toggleChildFields()">
+        Adult
+      </label>
+
+      <label>
+        <input type="radio" name="memberType" value="Child" onchange="toggleChildFields()">
+        Child
+      </label>
+    </div>
+
+
     <input id="firstName" placeholder="First Name">
     <input id="lastName" placeholder="Last Name">
 
@@ -34,6 +52,22 @@
       <label><input type="radio" name="gender" value="Female"> Female</label>
       <label><input type="radio" name="gender" value="Other"> Other</label>
     </div>
+
+    <!-- CHILD ONLY SECTION -->
+    <div id="childFields" class="child-section hidden">
+
+      <h3>Child Information</h3>
+
+      <!-- Parent Dropdown -->
+      <select id="parentMember">
+        <option value="">Select Parent / Guardian</option>
+      </select>
+
+      <!-- Date Of Birth -->
+      <input type="date" id="dateOfBirth">
+
+    </div>
+
 
     <input id="phone" placeholder="Phone Number" inputmode="numeric" pattern="[0-9]*"
       oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
@@ -60,52 +94,199 @@
   </div>
 
   <script>
+    const API_URL = "http://localhost:5000/api/members";
     const token = localStorage.getItem("token");
 
+    // LOAD ADULT MEMBERS INTO PARENT DROPDOWN
+    async function loadParents() {
+      try {
+        const response = await fetch(API_URL, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        const members = await response.json();
+
+        const parentDropdown =
+          document.getElementById("parentMember");
+
+        // Adults only
+        const adults =
+          members.filter(m => m.memberType !== "Child");
+
+        adults.forEach(member => {
+
+          const option =
+            document.createElement("option");
+
+          option.value = member._id;
+
+          option.textContent =
+            `${member.firstName} ${member.lastName}`;
+
+          parentDropdown.appendChild(option);
+
+        });
+
+      } catch (err) {
+
+        console.error("Error loading parents:", err);
+
+      }
+    }
+
+    // SHOW / HIDE CHILD FIELDS
+    function toggleChildFields() {
+
+      const memberType =
+        document.querySelector(
+          'input[name="memberType"]:checked'
+        ).value;
+
+      const childFields =
+        document.getElementById("childFields");
+
+      if (memberType === "Child") {
+
+        childFields.classList.remove("hidden");
+
+      } else {
+
+        childFields.classList.add("hidden");
+
+      }
+    }
+
+    // ADD MEMBER
     async function addMember() {
+
+      const memberType =
+        document.querySelector(
+          'input[name="memberType"]:checked'
+        ).value;
+
+      const isChild = memberType === "Child";
+
       const memberData = {
-        firstName: document.getElementById("firstName").value,
-        lastName: document.getElementById("lastName").value,
-        gender: document.querySelector('input[name="gender"]:checked')?.value || "",
-        phone: document.getElementById("phone").value,
-        email: document.getElementById("email").value,
-        address: document.getElementById("address").value,
-        joinDate: document.getElementById("joinDate").value,
-        status: document.querySelector('input[name="status"]:checked')?.value || "Active"
+
+        firstName:
+          document.getElementById("firstName").value,
+
+        lastName:
+          document.getElementById("lastName").value,
+
+        gender:
+          document.querySelector(
+            'input[name="gender"]:checked'
+          )?.value || "",
+
+        memberType,
+
+        isChild,
+
+        parentMember:
+          isChild
+            ? document.getElementById("parentMember").value
+            : null,
+
+        dateOfBirth:
+          isChild
+            ? document.getElementById("dateOfBirth").value
+            : null,
+
+        phone:
+          document.getElementById("phone").value,
+
+        email:
+          document.getElementById("email").value,
+
+        address:
+          document.getElementById("address").value,
+
+        joinDate:
+          document.getElementById("joinDate").value,
+
+        status:
+          document.querySelector(
+            'input[name="status"]:checked'
+          )?.value || "Active"
+
       };
 
       try {
-        const response = await fetch("http://localhost:5000/api/members", {
+
+        const response = await fetch(API_URL, {
+
           method: "POST",
+
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
+
           body: JSON.stringify(memberData)
+
         });
+
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to save member");
+
+          throw new Error(
+            data.message || "Failed to save member"
+          );
+
         }
 
-        // alert("Member saved successfully!");
-        document.getElementById("message").innerText = "Member added successfully!";
+        document.getElementById("message").innerText =
+          "Member added successfully!";
 
-        document.getElementById("firstName").value = "";
-        document.getElementById("lastName").value = "";
-        document.querySelectorAll('input[name="gender"]').forEach(r => r.checked = false);
-        document.getElementById("phone").value = "";
-        document.getElementById("email").value = "";
-        document.getElementById("address").value = "";
-        document.getElementById("joinDate").value = "";
-        document.querySelector('input[name="status"][value="Active"]').checked = true;
+        resetForm();
+
       } catch (error) {
+
         document.getElementById("message").innerText =
           "Error: " + error.message;
+
       }
     }
+
+    // RESET FORM
+    function resetForm() {
+
+      document.getElementById("firstName").value = "";
+      document.getElementById("lastName").value = "";
+
+      document
+        .querySelectorAll('input[name="gender"]')
+        .forEach(r => r.checked = false);
+
+      document.getElementById("phone").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("address").value = "";
+      document.getElementById("joinDate").value = "";
+
+      document
+        .querySelector(
+          'input[name="status"][value="Active"]'
+        ).checked = true;
+
+      document
+        .querySelector(
+          'input[name="memberType"][value="Adult"]'
+        ).checked = true;
+
+      document.getElementById("parentMember").value = "";
+      document.getElementById("dateOfBirth").value = "";
+
+      toggleChildFields();
+    }
+
+    loadParents();
+
   </script>
+
 </body>
 
 </html>
